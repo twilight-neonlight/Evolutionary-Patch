@@ -1,0 +1,16 @@
+{
+ "django": [
+  "<test frame>\nAssertionError: Lists differ: [<Err[320 chars] use ManyToManyField(\"self\", through=\"Ambiguou[94 chars]35'>] != [<Err[320 chars] use ForeignKey(\"self\", symmetrical=False, thr[108 chars]35'>]"
+ ],
+ "sympy": [
+  "<test frame>\nAssertionError"
+ ],
+ "pytest_sklearn": [
+  "<test frame>\n  File \"sklearn/utils/validation.py\", line 107, in as_float_array\n    ensure_2d=False)\n  File \"sklearn/utils/validation.py\", line 460, in check_array\n    is_dataframe = isinstance(array, pd.DataFrame)\nNameError: name 'pd' is not defined"
+ ],
+ "pytest_pylint": [
+  "<test frame>\n  File \"pylint/lint/pylinter.py\", line 615, in _discover_files\n    if any(\n  File \"pylint/lint/pylinter.py\", line 616, in ?\n    re.search(pattern, root)\nNameError: name 're' is not defined",
+  "<test frame>\nassert '[tool.pylint.main]' in ''\n+  where '' = CompletedProcess(args=['/opt/miniconda3/envs/testbed/bin/python', '-m', 'pylint', '--rcfile=/testbed/pylint/testutils/...KitError(\"Can\\'t add a table to a dotted key\")\\ntomlkit.exceptions.TOMLKitError: Can\\'t add a table to a dotted key\\n').stdout",
+  "<test frame>\ntomlkit.exceptions.TOMLKitError: Can't add a table to a dotted key"
+ ]
+}

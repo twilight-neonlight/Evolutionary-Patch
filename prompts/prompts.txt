@@ -1,0 +1,484 @@
+# prompts.txt — 모든 LLM 호출의 프롬프트 문장(타입 A: 기준 코드가 만드는 문장을 글자 그대로 옮긴 것)
+# 읽는 법(prompts/README.md에 자세히)
+# - 이 머리 주석(# 로 시작하는 줄, 첫 구분선 앞)과 `===== 이름 =====` 구분선은 프롬프트에 들어가지 않는다.
+# - 각 구간의 내용 = 구분선 다음 줄부터 다음 구분선 바로 앞 줄까지를 "\n"으로 이은 것(마지막 줄 뒤 줄바꿈 없음).
+#   그래서 내용의 맨 앞·맨 뒤 줄바꿈은 빈 줄로 보인다. 파일 끝은 ===== END =====.
+# - 자리표시자 {{이름}}은 한 번에 치환한다(넣은 값 안의 {{…}}는 다시 치환하지 않음).
+# - 코드는 구간을 이름으로 읽고, 상황에 맞는 구간을 고르고, 자리표시자를 채우고, 정해진 순서로 잇기만 한다.
+#   그 뒤 기존 규칙대로 test_files 마스킹과 길이 검사를 한다.
+# 조립 순서(호출별): prompts/README.md
+# 메시지: prep ①·② 와 V2 위치 호출은 user 메시지 하나. 초기 생성·교배·변이(재요청 포함)는 [system: SYSTEM, user].
+===== SYSTEM =====
+You are an expert Python software engineer who fixes bugs in open-source repositories.
+===== INIT_USER =====
+<issue>
+{{ISSUE}}
+</issue>
+
+Code that likely needs to change:
+{{LOCATION_CODE}}
+
+Write {{N}} different candidate patches that fix the issue. Make them genuinely different approaches
+where possible. Start each patch with a header line `### PATCH <number>` (1 to {{N}}) followed by one or
+more SEARCH/REPLACE blocks.
+
+Each edit is a SEARCH/REPLACE block in exactly this form:
+path/to/file.py
+<<<<<<< SEARCH
+<exact lines copied from the code shown above>
+=======
+<replacement lines>
+>>>>>>> REPLACE
+Rules:
+- REQUIRED: the line immediately before every `<<<<<<< SEARCH` must be the file path alone
+  (exactly as written in the code headers above, e.g. `pkg/module.py`). Never omit it.
+- Do not wrap the blocks in ``` code fences and do not put explanations between blocks.
+- Only edit inside the functions shown above; the SEARCH part must match existing lines exactly
+  (including indentation); keep SEARCH short but unique; use several blocks for several places.
+
+Output only the {{N}} patches, no explanations.
+===== LOCATION_CODE.ITEM =====
+### {{FILE}} :: {{SYMBOL}} (lines {{START_LINE}}-{{END_LINE}})
+```python
+{{CODE}}
+```
+===== LOCATION_CODE.SEPARATOR =====
+
+
+
+===== INIT_RETRY_NOTICE.HEADER =====
+
+
+Your previous answer did not give enough valid patches. Problems found by the validity check:
+
+===== INIT_RETRY_NOTICE.NO_PROBLEM_LINES =====
+- not enough valid patches.
+===== INIT_RETRY_NOTICE.RULES_HEADER =====
+
+Rules:
+
+===== INIT_RETRY_NOTICE.PATCH_LINE =====
+- PATCH {{PATCH_NO}}: {{WHAT}}
+===== INIT_RETRY_NOTICE.RULE_ITEM =====
+- {{RULE}}
+===== INIT_RETRY_NOTICE.search_not_found.LINE =====
+SEARCH block #{{BLOCK}}{{IN_FILE}} (first line: `{{FIRST_LINE}}`) does not match the code shown above anywhere.
+===== INIT_RETRY_NOTICE.search_not_found.RULE =====
+Every SEARCH part must be copied character for character from the code shown above, inside the shown function ranges. Do not change even a single character of the copied text. Functions that are not shown above cannot be modified.
+===== INIT_RETRY_NOTICE.match_outside_location.LINE =====
+SEARCH block #{{BLOCK}}{{IN_FILE}} (first line: `{{FIRST_LINE}}`) matches code outside the functions shown above.
+===== INIT_RETRY_NOTICE.match_outside_location.RULE =====
+Edit only inside the function ranges shown above; code outside them cannot be modified.
+===== INIT_RETRY_NOTICE.file_not_in_locations.LINE =====
+it edits `{{FILE_OR_DETAIL}}`, which is not one of the files shown above.
+===== INIT_RETRY_NOTICE.file_not_in_locations.RULE =====
+Edit only the files shown above, writing each path exactly as in the code headers.
+===== INIT_RETRY_NOTICE.missing_file_path.LINE =====
+a SEARCH/REPLACE block has no file path line before `<<<<<<< SEARCH`.
+===== INIT_RETRY_NOTICE.missing_file_path.RULE =====
+Put the file path alone on the line immediately before every `<<<<<<< SEARCH`.
+===== INIT_RETRY_NOTICE.empty_search.LINE =====
+a SEARCH part{{IN_FILE}} is empty.
+===== INIT_RETRY_NOTICE.empty_search.RULE =====
+Every SEARCH part must contain at least one existing line of the code shown above.
+===== INIT_RETRY_NOTICE.empty_diff.LINE =====
+its REPLACE text leaves the code unchanged.
+===== INIT_RETRY_NOTICE.empty_diff.RULE =====
+Each patch must actually change the code.
+===== INIT_RETRY_NOTICE.syntax_error.LINE =====
+the patched file does not compile ({{DETAIL_160}}).
+===== INIT_RETRY_NOTICE.syntax_error.RULE =====
+The patched code must be valid Python with correct indentation.
+===== INIT_RETRY_NOTICE.no_edits.LINE =====
+no SEARCH/REPLACE block could be read.
+===== INIT_RETRY_NOTICE.no_edits.RULE =====
+Write every patch as one or more SEARCH/REPLACE blocks in the required format.
+===== INIT_RETRY_NOTICE.truncated.LINE =====
+- Your previous answer was cut off at the length limit; only {{PARSED}} of {{REQUESTED}} requested patches were complete.
+===== INIT_RETRY_NOTICE.truncated.RULE =====
+Keep each patch short so that all requested patches fit in one answer.
+===== INIT_RETRY_NOTICE.parse_failure.LINE =====
+- Only {{PARSED}} of {{REQUESTED}} requested patches could be read from your previous answer.
+===== INIT_RETRY_NOTICE.parse_failure.RULE =====
+Start each patch with a `### PATCH <number>` header followed by its SEARCH/REPLACE blocks.
+===== INIT_RETRY_NOTICE.OTHER.LINE =====
+it was rejected ({{REASON}}).
+===== INIT_RETRY_NOTICE.search_not_unique.LINE =====
+SEARCH block #{{BLOCK}}{{IN_FILE}} (first line: `{{FIRST_LINE}}`) matches more than one place in the file.
+===== INIT_RETRY_NOTICE.search_not_unique.RULE =====
+Each SEARCH part must match exactly one place in its file; include more surrounding lines so that it is unique.
+===== INIT_RETRY_NOTICE.search_not_found.RULE.FILE_SCOPE =====
+Every SEARCH part must be copied character for character from the code shown above. Do not change even a single character of the copied text. Files that are not shown above cannot be modified.
+===== INIT_USER.FILE_SCOPE =====
+<issue>
+{{ISSUE}}
+</issue>
+
+Code that likely needs to change:
+{{LOCATION_CODE}}
+
+Write {{N}} different candidate patches that fix the issue. Make them genuinely different approaches
+where possible. Start each patch with a header line `### PATCH <number>` (1 to {{N}}) followed by one or
+more SEARCH/REPLACE blocks.
+
+Each edit is a SEARCH/REPLACE block in exactly this form:
+path/to/file.py
+<<<<<<< SEARCH
+<exact lines copied from the code shown above>
+=======
+<replacement lines>
+>>>>>>> REPLACE
+Rules:
+- REQUIRED: the line immediately before every `<<<<<<< SEARCH` must be the file path alone
+  (exactly as written in the code headers above, e.g. `pkg/module.py`). Never omit it.
+- Do not wrap the blocks in ``` code fences and do not put explanations between blocks.
+- Only edit the files shown above (anywhere in those files, including module-level code such as imports);
+  the SEARCH part must match existing lines exactly (including indentation) and must match only one place
+  in its file; keep SEARCH short but unique; use several blocks for several places.
+
+Output only the {{N}} patches, no explanations.
+===== EDIT_FORMAT =====
+Each edit is a SEARCH/REPLACE block in exactly this form:
+path/to/file.py
+<<<<<<< SEARCH
+<exact lines copied from the code shown above>
+=======
+<replacement lines>
+>>>>>>> REPLACE
+Rules:
+- REQUIRED: the line immediately before every `<<<<<<< SEARCH` must be the file path alone
+  (exactly as written in the code headers above, e.g. `pkg/module.py`). Never omit it.
+- Do not wrap the blocks in ``` code fences and do not put explanations between blocks.
+- Only edit inside the functions shown above; the SEARCH part must match existing lines exactly
+  (including indentation); keep SEARCH short but unique; use several blocks for several places.
+===== EDIT_FORMAT.FILE_SCOPE =====
+Each edit is a SEARCH/REPLACE block in exactly this form:
+path/to/file.py
+<<<<<<< SEARCH
+<exact lines copied from the code shown above>
+=======
+<replacement lines>
+>>>>>>> REPLACE
+Rules:
+- REQUIRED: the line immediately before every `<<<<<<< SEARCH` must be the file path alone
+  (exactly as written in the code headers above, e.g. `pkg/module.py`). Never omit it.
+- Do not wrap the blocks in ``` code fences and do not put explanations between blocks.
+- Only edit the files shown above (anywhere in those files, including module-level code such as imports);
+  the SEARCH part must match existing lines exactly (including indentation) and must match only one place
+  in its file; keep SEARCH short but unique; use several blocks for several places.
+===== SEARCH_NOT_FOUND_DETAIL =====
+{{LINE}} {{RULE}}
+===== CROSSOVER_USER =====
+<issue>
+{{ISSUE}}
+</issue>
+
+Code that likely needs to change:
+{{LOCATION_CODE}}
+
+Two candidate patches for this issue:
+{{PARENT_A}}
+
+{{PARENT_B}}
+
+Write ONE new patch that semantically combines the useful changes of Patch A and Patch B to fix the
+issue. Express it as SEARCH/REPLACE blocks against the ORIGINAL code shown above (not against either patch).
+
+{{EDIT_FORMAT}}
+
+Output only the SEARCH/REPLACE blocks.
+===== CROSSOVER_USER.FEEDBACK =====
+<issue>
+{{ISSUE}}
+</issue>
+
+Code that likely needs to change:
+{{LOCATION_CODE}}
+
+Two candidate patches for this issue:
+{{PARENT_A}}
+{{RESULTS_A}}
+
+{{PARENT_B}}
+{{RESULTS_B}}{{SOURCE_PART}}
+
+Refer to the parent patches and their test results above.
+Write ONE new patch that semantically combines the useful changes of Patch A and Patch B to fix the
+issue. Express it as SEARCH/REPLACE blocks against the ORIGINAL code shown above (not against either patch).
+
+{{EDIT_FORMAT}}
+
+Output only the SEARCH/REPLACE blocks.
+===== MUTATION_USER =====
+<issue>
+{{ISSUE}}
+</issue>
+
+Code that likely needs to change:
+{{LOCATION_CODE}}
+
+Two earlier candidate patches and their test results:
+{{PARENT_A}}
+{{RESULTS_A}}
+
+{{PARENT_B}}
+{{RESULTS_B}}
+
+Using these failures as feedback, re-implement the fix at the same place with a DIFFERENT approach.
+Express it as SEARCH/REPLACE blocks against the ORIGINAL code shown above.
+
+{{EDIT_FORMAT}}
+
+Output only the SEARCH/REPLACE blocks.
+===== MUTATION_USER.FEEDBACK =====
+<issue>
+{{ISSUE}}
+</issue>
+
+Code that likely needs to change:
+{{LOCATION_CODE}}
+
+Two earlier candidate patches and their test results:
+{{PARENT_A}}
+{{RESULTS_A}}
+
+{{PARENT_B}}
+{{RESULTS_B}}{{SOURCE_PART}}
+
+Using these failures as feedback, re-implement the fix at the same place with a DIFFERENT approach.
+Express it as SEARCH/REPLACE blocks against the ORIGINAL code shown above.
+
+{{EDIT_FORMAT}}
+
+Output only the SEARCH/REPLACE blocks.
+===== SOURCE_PART =====
+
+
+{{SOURCE}}
+===== PARENT.LABEL_A =====
+Patch A
+===== PARENT.LABEL_B =====
+Patch B
+===== PARENT.VALID =====
+{{LABEL}} (unified diff):
+```diff
+{{DIFF}}
+```
+===== PARENT.INVALID =====
+{{LABEL}} (INVALID patch: it could not be applied or did not compile):
+```
+{{RAW}}
+```
+===== PARENT.INVALID_EMPTY =====
+(empty)
+===== RETRY_SUFFIX =====
+
+
+Your previous answer was rejected by the validity check.
+Reason: {{REASON}}{{DETAIL_PART}}
+Previous answer:
+```
+{{PREVIOUS}}
+```
+Fix the problem and answer again in the required format.
+===== RETRY_SUFFIX.DETAIL_PART =====
+ ({{DETAIL}})
+===== RESULTS.INVALID =====
+Execution results: NONE (this parent was an invalid patch and was not executed).
+===== RESULTS.REPRO =====
+Reproduction test: {{RESULT}}
+===== RESULTS.PASSED =====
+PASSED
+===== RESULTS.FAILED =====
+FAILED
+===== RESULTS.STATUS_LINE =====
+  per-test status: {{STATUSES}}
+===== RESULTS.STATUS_ITEM =====
+{{TEST}}={{STATUS}}
+===== RESULTS.STATUS_SEPARATOR =====
+, 
+===== RESULTS.STATUS_MORE =====
+ (first {{SHOWN}} of {{TOTAL}})
+===== RESULTS.OUTPUT_TAIL =====
+  output (tail):
+{{TAIL}}
+===== RESULTS.TIMED_OUT =====
+  (test run timed out)
+===== RESULTS.REGRESSION_NOT_AVAILABLE =====
+Regression tests: not available for this issue.
+===== RESULTS.REGRESSION_COUNTS =====
+Regression tests: {{PASSED}}/{{TOTAL}} passed, {{FAILED}} failed
+===== RESULTS.REGRESSION_NONE =====
+Regression tests: none for this issue.
+===== RESULTS.REGRESSION_NO_FAILURES =====
+Regression tests: no failures.
+===== RESULTS.REGRESSION_FAILED_COUNT =====
+Regression tests that did not pass: {{N}}
+===== RESULTS.REGRESSION_FAILURE =====
+Regression failure #{{K}}:
+```
+{{MESSAGE}}
+```
+===== RESULTS.TRUNCATED =====
+... (truncated)
+===== RESULTS.SOURCE.APPENDED =====
+Reproduction test used to evaluate the patches. It is appended to the existing test file `{{PATH}}` (only the appended part is shown):
+```python
+{{SOURCE}}
+```
+===== RESULTS.SOURCE.SAVED =====
+Reproduction test used to evaluate the patches (saved as `{{PATH}}`):
+```python
+{{SOURCE}}
+```
+===== REGRESSION_MESSAGE.TEST_FRAME =====
+<test frame>
+===== REGRESSION_MESSAGE.NAME_MASK =====
+<test>
+===== REGRESSION_MESSAGE.FRAME =====
+  File "{{PATH}}", line {{LINE}}, in {{FUNC}}
+===== REGRESSION_MESSAGE.FRAME_CODE =====
+
+    {{CODE}}
+===== MASK.TEST_FILE =====
+<test file>
+===== PREP.FILES_USER =====
+Repository: {{REPO}} (version {{VERSION}}), base commit {{BASE_COMMIT}}
+{{FILE_LIST}}
+<issue>
+{{ISSUE}}
+</issue>
+
+Task: Select up to {{MAX_FILES}} non-test Python source files of this repository that you need to read in order to
+(1) write a test that reproduces the issue and (2) find the functions or methods that must change to fix it,
+most relevant first. Choose source files only, never test files. If the issue text contains a traceback or
+mentions file paths or function names, prefer those files. Give each path relative to the repository root.
+
+Output exactly this format and nothing else:
+### FILES
+path/to/module.py
+path/to/other_module.py
+===== PREP.FILE_LIST =====
+
+Repository {{HEADER}}:
+{{LIST}}
+
+===== PREP.FILE_LIST.HEADER.full =====
+non-test Python source files
+===== PREP.FILE_LIST.HEADER.grouped =====
+non-test Python source files, grouped as `directory/: file names`
+===== PREP.FILE_LIST.HEADER.dirs =====
+directories containing non-test Python source files (file lists omitted for size)
+===== PREP.FILE_LIST.HEADER.dirs_depth2 =====
+top-level directories containing non-test Python source files (file lists omitted for size)
+===== PREP.FILE_LIST.GROUPED_ITEM =====
+{{DIR}}/: {{FILES}}
+===== PREP.FILE_LIST.DIR_ITEM =====
+{{DIR}}/ ({{N}} files)
+===== PREP.LOCATE_USER =====
+Repository: {{REPO}} (version {{VERSION}}), base commit {{BASE_COMMIT}}
+
+Source code of files relevant to the issue ({{CODE_NOTE}}):
+{{CODE_CONTEXT}}
+
+<issue>
+{{ISSUE}}
+</issue>
+
+{{V2_BLOCK_PART}}Task:
+1. Write ONE self-contained test file that reproduces the issue. It must FAIL on the
+   current code and PASS once the issue is correctly fixed. Test only the behavior described
+   in the issue, import from the repository's package, and do not use network access.
+   {{RUNNER_RULE}}
+2. List up to {{MAX_LOCATIONS}} FUNCTIONS or METHODS in the repository's source code (not tests) that most
+   likely need to change to fix the issue, most likely first. Prefer functions and methods in the code shown
+   above. Name functions and methods only, never a class or a module by itself. If the issue text contains a
+   traceback or mentions file paths or function names, prefer those. Format: `path/to/file.py::function_name`
+   for a module-level function, `path/to/file.py::ClassName.method_name` for a method. Examples:
+   `django/db/models/query.py::QuerySet.filter`, `requests/utils.py::get_encoding_from_headers`.
+
+Output exactly this format and nothing else:
+### LOCATIONS
+path/to/module.py::function_name
+path/to/module.py::ClassName.method_name
+### TEST
+```python
+<test file content>
+```
+===== PREP.CODE_NOTE.full =====
+full file contents
+===== PREP.CODE_NOTE.skeleton =====
+skeletons: classes and functions with decorators and signatures, each line prefixed by its line number; function bodies are omitted
+===== PREP.CODE_FILE.full =====
+### {{PATH}} (full file, {{N}} lines)
+```python
+{{TEXT}}
+```
+===== PREP.CODE_FILE.skeleton =====
+### {{PATH}} (skeleton)
+```python
+{{TEXT}}
+```
+===== PREP.CODE_FILE.SEPARATOR =====
+
+
+
+===== PREP.SKELETON.END_OF_CLASS =====
+# end of class {{NAME}} (lines {{START}}-{{END}})
+===== PREP.SKELETON.BODY_OMITTED =====
+...  # body omitted (lines {{START}}-{{END}})
+===== PREP.SKELETON.TRUNCATED =====
+... (skeleton truncated)
+===== PREP.RUNNER_RULE.django =====
+Write classes deriving from `django.test.SimpleTestCase` (or `django.test.TestCase` if the database is needed). Do not define models. The file is saved as `tests/swe_repro/tests.py` and run by `tests/runtests.py` with label `swe_repro`.
+===== PREP.RUNNER_RULE.sympy =====
+Write plain `test_*` functions with `assert` (no pytest import). The file is run by sympy's `bin/test`.
+===== PREP.RUNNER_RULE.pytest =====
+Write pytest test functions named `test_*`. The file is saved as `{{PATH}}` and run with `{{PREFIX}} {{PATH}}`.
+===== V2.BLOCK_PART =====
+{{BLOCK}}
+
+
+===== V2.LAB_TEST =====
+Reproduction test for this issue. It is appended to the existing test file `{{TARGET}}` (only the appended part is shown):
+```python
+{{BLOCK}}
+```
+===== V2.LLM_TEST =====
+Reproduction test for this issue (saved as `{{PATH}}`):
+```python
+{{BLOCK}}
+```
+===== V2.TEST_TRUNCATED =====
+
+# ... (truncated)
+===== V2.OUTPUT =====
+
+
+Output of running this test on the current (unfixed) code{{NOTE}}:
+```
+{{LOG}}
+```
+===== V2.OUTPUT_NOTE =====
+ (truncated: first {{HEAD}} and last {{TAIL}} characters)
+===== V2.LOG_OMITTED =====
+
+... [{{N}} lines omitted] ...
+
+===== S2.FULL_FILE =====
+### {{PATH}} (full file, {{N}} lines)
+```python
+{{SOURCE}}
+```
+===== S2.EXCERPT_HEADER =====
+### {{PATH}} (excerpts of the file; other lines omitted)
+===== S2.EXCERPT =====
+#### {{PATH}} lines {{START}}-{{END}}
+```python
+{{CODE}}
+```
+===== S2.FILE_SEPARATOR =====
+
+
+
+===== END =====

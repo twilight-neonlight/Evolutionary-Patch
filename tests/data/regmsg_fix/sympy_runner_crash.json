@@ -1,0 +1,1 @@
+{"repo": "sympy/sympy", "failed": ["test_NumberKind", "test_Add_kind", "test_mul_kind", "test_Symbol_kind"], "all": ["test_NumberKind", "test_Add_kind", "test_mul_kind", "test_Symbol_kind"], "test_files": ["sympy/core/tests/test_kind.py"]}

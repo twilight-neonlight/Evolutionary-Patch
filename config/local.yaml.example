@@ -1,0 +1,11 @@
+# 서버별 값(git 제외). 복사해서 쓴다: cp config/local.yaml.example config/local.yaml
+# 실행할 때 config/main.yaml 위에 덮어쓴다(키별로 합침). 실행 폴더에는 합친 설정과 이 파일의 SHA-256이 남는다.
+llm:
+  base_url: http://127.0.0.1:8000/v1      # vLLM OpenAI 호환 서버 주소
+external:
+  repro_tests_dir: /path/to/repro_tests   # 제3자 연구 재현 테스트 산출물 폴더(별도로 받음)
+  repro_tests_format: new_standalone      # new_standalone | old_appended
+  repro_tests_checksum_list: /path/to/repro_tests.sha256   # scripts/checksum_package.py 출력(git 제외)
+  repro_tests_checksum: null              # 그 목록 파일의 SHA-256
+grading:
+  python: null                            # 채점 하니스를 돌릴 파이썬(swebench 5.0.2). null = 실행 중인 파이썬

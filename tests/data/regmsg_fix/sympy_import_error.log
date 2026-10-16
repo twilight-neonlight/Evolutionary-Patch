@@ -1,0 +1,49 @@
+
+============================= test process starts ==============================
+executable:         /opt/miniconda3/envs/testbed/bin/python  (3.9.20-final-0) [CPython]
+architecture:       64-bit
+cache:              no
+ground types:       python 
+numpy:              None
+random seed:        46341369
+hash randomization: on (PYTHONHASHSEED=2272861643)
+
+Esympy/core/tests/test_var.py[5] 
+test_var E
+test_var_return ok
+test_var_accepts_comma ok
+test_var_keywords ok
+test_var_cls ok                                                           [FAIL]
+
+
+________________________________________________________________________________
+________________________________________________________________________________
+Traceback (most recent call last):
+  File "/testbed/sympy/core/tests/test_expr.py", line 12, in <module>
+    from sympy.physics.secondquant import FockState
+  File "/testbed/sympy/physics/__init__.py", line 5, in <module>
+    from . import units
+  File "/testbed/sympy/physics/units/__init__.py", line 34, in <module>
+    from .util import convert_to
+  File "/testbed/sympy/physics/units/util.py", line 10, in <module>
+    from sympy.physics.units.prefixes import Prefix
+  File "/testbed/sympy/physics/units/prefixes.py", line 153, in <module>
+    yotta = Prefix('yotta', 'Y', 24)
+  File "/testbed/sympy/physics/units/prefixes.py", line 34, in __new__
+    name = sympify(name)
+  File "/testbed/sympy/core/sympify.py", line 372, in sympify
+    if isinstance(a, str_types) and '.' in a:
+NameError: name 'str_types' is not defined
+________________________________________________________________________________
+____________________ sympy/core/tests/test_var.py:test_var _____________________
+Traceback (most recent call last):
+  File "/testbed/sympy/core/tests/test_var.py", line 22, in test_var
+    assert v == ['d', 'e', 'fg']
+  File "/testbed/sympy/core/expr.py", line 124, in __eq__
+    other = sympify(other)
+  File "/testbed/sympy/core/sympify.py", line 372, in sympify
+    if isinstance(a, str_types) and '.' in a:
+NameError: name 'str_types' is not defined
+
+=========== tests finished: 4 passed, 2 exceptions, in 0.03 seconds ============
+DO *NOT* COMMIT!

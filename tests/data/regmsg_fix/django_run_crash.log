@@ -1,0 +1,28 @@
+
+Testing against Django installed in '/testbed/django'
+Traceback (most recent call last):
+  File "./tests/runtests.py", line 586, in <module>
+    failures = django_tests(
+  File "./tests/runtests.py", line 305, in django_tests
+    state = setup(verbosity, test_labels, parallel, start_at, start_after)
+  File "./tests/runtests.py", line 197, in setup
+    django.setup()
+  File "/testbed/django/__init__.py", line 24, in setup
+    apps.populate(settings.INSTALLED_APPS)
+  File "/testbed/django/apps/registry.py", line 114, in populate
+    app_config.import_models()
+  File "/testbed/django/apps/config.py", line 301, in import_models
+    self.models_module = import_module(models_module_name)
+  File "/opt/miniconda3/envs/testbed/lib/python3.8/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1014, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 991, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 975, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 671, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 843, in exec_module
+  File "<frozen importlib._bootstrap>", line 219, in _call_with_frames_removed
+  File "/testbed/django/contrib/contenttypes/models.py", line 133, in <module>
+    class ContentType(models.Model):
+  File "/testbed/django/db/models/base.py", line 181, in __new__
+    new_class.add_to_class('id', AutoField(primary_key=True))
+NameError: name 'AutoField' is not defined

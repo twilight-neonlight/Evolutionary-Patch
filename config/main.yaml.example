@@ -1,0 +1,125 @@
+# 본 실험 설정 초안. 복사해서 쓴다: cp config/main.yaml.example config/main.yaml
+# 서버마다 다른 값(모델 서버 주소, 외부 재현 테스트 산출물 경로, 채점용 파이썬)은 config/local.yaml(git 제외)에 두고,
+# 실행 시 --local config/local.yaml(있으면 기본으로 읽음)이 이 파일 위에 덮어쓴다. 실행 폴더에는 합친 결과가 저장된다.
+# 값의 근거는 docs/METHOD.md(방법 명세) 8절. 결과에 영향을 주는 값은 모두 이 파일에 있다.
+
+run:
+  run_id: main                    # 실행 폴더 이름: runs/<YYYYMMDD>_<run_id>
+  run_index: 0                    # 시드 유도에 들어가는 실행 번호(같은 설정을 반복할 때만 바꿈)
+  runs_dir: runs
+  instance_ids_file: null         # 이슈 ID 목록 파일(한 줄에 하나). --ids-file로도 줌
+  algo_version: main_v1           # 이슈마다 issues.jsonl에 기록하는 방법 판 이름
+  issue_concurrency: 8            # 동시에 처리하는 이슈 수
+
+data:                             # scripts/prepare_data.py가 만드는 위치(data/MANIFEST에 출처·해시)
+  parquet:                        # 이슈 본문 등(로더는 허용 6필드만 읽음). 목록은 앞이 우선
+    - data/SWE-bench_Verified/test.parquet
+    - data/SWE-bench_Lite/test.parquet
+  regression_pool:                # Agentless select_regression 산출물(tests_passing_in_original_repo)
+    - data/agentless/verified_select_regression.jsonl
+    - data/agentless/lite_select_regression.jsonl
+  exec_specs:                     # 실행 명세(scripts/extract_exec_specs.py가 데이터셋에서 생성)
+    - data/exec_specs/verified.json
+    - data/exec_specs/lite.json
+
+prompts:
+  path: prompts/prompts.txt       # 프롬프트 고정 문서. 실행 메타에 경로와 SHA-256을 기록
+  type: A                         # 문서 타입 표시(A = 기존 문장 그대로). 미결정(METHOD 12절)
+
+llm:
+  base_url: http://127.0.0.1:8000/v1   # OpenAI 호환 서버(vLLM). local.yaml에서 덮어씀
+  model: devstral                 # 서빙 이름(--served-model-name). 시작 전 /v1/models로 확인
+  context_window: 32768
+  http_timeout_s: 900
+  conn_retries: 3                 # 연결 오류·5xx 재시도(유효성 재요청과 별개)
+  conn_backoff_s: 10
+  sampling:                       # 재요청은 원래 단계 값. top_k는 끔(-1), 반복 페널티 1.0으로 보냄
+    prep:      {temperature: 0.7, top_p: 1.0}
+    init:      {temperature: 0.7, top_p: 1.0}
+    crossover: {temperature: 0.5, top_p: 1.0}
+    mutation:  {temperature: 0.7, top_p: 1.0}
+  max_tokens:
+    prep: 4096                    # prep ②·V2 위치 호출 응답 상한
+    prep_files: 1024              # prep ①(후보 파일) 응답 상한
+    single_patch: 4096            # 교배·변이·재시도
+    init_per_patch: 1500          # init = min(context_window − 입력 − init_margin, 요청 수 × init_per_patch)
+    init_margin: 512
+
+algorithm:
+  N: 10                           # 개체군 크기(0세대 한 호출에 N개)
+  K: 5                            # 세대 수(0세대 포함)
+  p_mut: 0.15                     # 자식마다 변이 확률(교배·재시도가 끝난 뒤 판정)
+  crossover_max_retries: 2        # R: 교배 유효성 재요청 횟수
+  mutation_max_retries: 0         # 변이는 재요청 없음(무효면 교배 자식 유지)
+  init_shortfall_max_retries: 2   # 0세대 부족분 재요청 횟수
+  parent_redraw_max: 0            # 같은 후보가 한 쌍에 두 번 뽑혀도 허용(재추첨 없음)
+  min_valid_to_evolve: 2          # 0세대 유효 후보가 이 수 미만이면 진화 없음(0개 빈 패치, 1개 그 후보 제출)
+  tie_break: newer_first          # 적합도 동점: 나중 세대 우선, 같은 세대면 후보 번호 순
+  edit_scope: function            # 수정 범위: function(S0, 위치 함수 범위) | file(S2, 위치 파일 전체). 미결정(METHOD 12절)
+
+loop:
+  feedback: both                  # 교배·변이에 부모별 테스트 실행 결과(METHOD 7절). off | mutation_only | both
+
+prep:
+  provider: hybrid_v2             # 외부 재현 테스트 우선 → base 실행 → V2 위치 호출 → 대체(METHOD 2절)
+  location_priority: simple_first
+  simple:
+    max_locations: 3              # 위치 최대 수
+    allow_class_locations: true   # 클래스 식별자 → 클래스 본문 전체를 위치 범위로
+    candidate_files:              # prep ①: 이슈 + 비테스트 소스 파일 목록 → 후보 파일
+      max_files: 3
+      selection: llm
+    code_input:                   # prep ②·V2: 후보 파일 base 코드 예산(토큰). full → skeleton → skeleton_drop → skeleton_truncated
+      max_tokens: 12000
+    file_list:                    # prep ① 파일 목록 예산(줄이는 단계: full → grouped → dirs → dirs_depth2)
+      enabled: true
+      max_tokens: 8000
+    repro_paths:                  # LLM 재현 테스트를 저장할 저장소별 경로
+      astropy/astropy: astropy/tests/test_swe_repro.py
+      scikit-learn/scikit-learn: sklearn/tests/test_swe_repro.py
+      matplotlib/matplotlib: lib/matplotlib/tests/test_swe_repro.py
+      pydata/xarray: xarray/tests/test_swe_repro.py
+      pylint-dev/pylint: tests/test_swe_repro.py
+      pytest-dev/pytest: testing/test_swe_repro.py
+      django/django: tests/swe_repro/tests.py
+      sympy/sympy: sympy/core/tests/test_swe_repro.py
+      sphinx-doc/sphinx: tests/test_swe_repro.py
+      mwaskom/seaborn: tests/test_swe_repro.py
+      pallets/flask: tests/test_swe_repro.py
+      psf/requests: tests/test_swe_repro.py
+
+external:                         # 제3자 연구 재현 테스트 산출물(별도로 받아야 함, git 제외). local.yaml에서 경로 지정
+  repro_tests_format: new_standalone  # new_standalone: <이슈>/{generated_test.py, code_context.json, issue_clue.json}(독립 파일, 저장소별 고정 경로에서 파일 전체 실행)
+                                      # old_appended: complete/<이슈>/{test.py, context.json, clue.json}(기존 테스트 파일 + 덧붙인 블록)
+  repro_tests_dir: null           # 패키지 폴더(git 제외). local.yaml에서 지정
+  repro_tests_checksum_list: null # 패키지 모든 파일의 SHA-256 목록(scripts/checksum_package.py로 생성, git 제외 위치)
+  repro_tests_checksum: null      # 그 목록 파일의 SHA-256. 시작 시 목록과 패키지 파일 전체를 대조하고 실행 메타에 기록
+
+executor:
+  repro_timeout_s: 120
+  regression_timeout_s: 600
+  setup_timeout_s: 1800           # 사전 명령(설치 등) 상한
+  max_parallel_containers: 32
+  memory_limit_gb: 16             # 후보 컨테이너 메모리 상한
+  regression_cap: null            # 회귀 테스트 수 상한 없음
+  repro_on_base: true             # base에서 재현 테스트 실행 결과 기록
+
+grading:
+  python: null                    # 채점 하니스를 돌릴 파이썬(swebench 5.0.2). null이면 지금 실행 중인 파이썬
+  datasets:                       # 예측을 처음 포함하는 데이터셋에 배정. 해결률 분모는 데이터셋 전체
+    - {name: SWE-bench/SWE-bench_Verified, short: verified, parquet: data/SWE-bench_Verified/test.parquet}
+    - {name: SWE-bench/SWE-bench_Lite, short: lite, parquet: data/SWE-bench_Lite/test.parquet}
+  max_workers: 16
+
+diagnostics:
+  gen0_find_defs: false           # 진단 전용(결과 영향 없음)
+
+unattended:                       # 운영 값(결과 영향 없음, --resume 때 달라도 허용)
+  issue_timeout_s: 7200           # 이슈 하나의 wall-clock 상한
+  infra_wait_max_s: 1800          # 인프라 오류 시 건강 검사 대기 상한
+  infra_poll_s: 60
+  disk_guard_gb: 120              # Docker 디스크 여유 하한(미만이면 새 이슈를 시작하지 않고 종료)
+  image_unavailable_escalate_after: 5
+  pull_min_interval_s: 0
+  status_interval_s: 300
+  postprocess: false              # 끝난 뒤 채점·보고서 자동 실행

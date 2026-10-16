@@ -1,0 +1,9 @@
+# data/MANIFEST — scripts/prepare_data.py가 쓴다. 이 파일만 git으로 추적하고 data/의 나머지는 제외한다.
+# 형식: 경로(data/ 기준)<TAB>SHA-256<TAB>출처(고정 버전)<TAB>URL
+#
+SWE-bench_Lite/test.parquet	438e281d80587aa7be470896ce410557002fde02d2ceee3e099331d308f62dd3	hf:SWE-bench/SWE-bench_Lite@b0dde1093fe417d83b7184254edf8199c1f0dff5/data/test-00000-of-00001.parquet	https://huggingface.co/datasets/SWE-bench/SWE-bench_Lite/resolve/b0dde1093fe417d83b7184254edf8199c1f0dff5/data/test-00000-of-00001.parquet
+SWE-bench_Verified/test.parquet	030cfd7f2a704c4c0226e7f104c725a3b41230b1d3517f9c915ad7ea5be3fa25	hf:SWE-bench/SWE-bench_Verified@78f471bf655a3137b2e8a75af1501690ec009ec3/data/test-00000-of-00001.parquet	https://huggingface.co/datasets/SWE-bench/SWE-bench_Verified/resolve/78f471bf655a3137b2e8a75af1501690ec009ec3/data/test-00000-of-00001.parquet
+agentless/lite_select_regression.jsonl	4cdc427b8008811989f32064c72659794264b00ddb602185aaf2e4130f39ec79	github:OpenAutoCoder/Agentless@v1.5.0/agentless_swebench_lite.zip:agentless_swebench_lite/select_regression/output.jsonl	https://github.com/OpenAutoCoder/Agentless/releases/download/v1.5.0/agentless_swebench_lite.zip	(zip sha256 a7787c0e1f0ed26fe68e938ef1f525b2b533d3b8d332adf9ab9a0ce5fe1faf52)
+agentless/verified_select_regression.jsonl	959b2081422915f374d8489832893640a20f3264971740399aec4ac00a77fda0	github:OpenAutoCoder/Agentless@v1.5.0/agentless_swebench_verified.zip:agentless_swebench_verified/select_regression/output.jsonl	https://github.com/OpenAutoCoder/Agentless/releases/download/v1.5.0/agentless_swebench_verified.zip	(zip sha256 e8966cd3087a3f2d2e75a915959a1f007e0ea0cbfbef61ed23800053ce6784db)
+exec_specs/lite.json	91fbddbb86b6d7a2e87c93561000638457cb78cdab75ffcfc25b587f0e65f458	generated: scripts/extract_exec_specs.py from SWE-bench_Lite/test.parquet	-
+exec_specs/verified.json	b545cf43daab7534cca9249c208f2871d71e068d8f03473f7048ef21d68a6104	generated: scripts/extract_exec_specs.py from SWE-bench_Verified/test.parquet	-

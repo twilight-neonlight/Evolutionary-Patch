@@ -1,0 +1,98 @@
+
+============================= test session starts ==============================
+platform linux -- Python 3.10.15, pytest-7.4.0, pluggy-1.5.0
+rootdir: /testbed
+configfile: setup.cfg
+plugins: xdist-3.6.1, env-1.1.5, cov-5.0.0, hypothesis-6.114.0
+collected 1644 items / 1 error
+
+==================================== ERRORS ====================================
+__________________ ERROR collecting xarray/tests/test_dask.py __________________
+/opt/miniconda3/envs/testbed/lib/python3.10/site-packages/_pytest/runner.py:341: in from_call
+    result: Optional[TResult] = func()
+/opt/miniconda3/envs/testbed/lib/python3.10/site-packages/_pytest/runner.py:372: in <lambda>
+    call = CallInfo.from_call(lambda: list(collector.collect()), "collect")
+/opt/miniconda3/envs/testbed/lib/python3.10/site-packages/_pytest/python.py:531: in collect
+    self._inject_setup_module_fixture()
+/opt/miniconda3/envs/testbed/lib/python3.10/site-packages/_pytest/python.py:545: in _inject_setup_module_fixture
+    self.obj, ("setUpModule", "setup_module")
+/opt/miniconda3/envs/testbed/lib/python3.10/site-packages/_pytest/python.py:310: in obj
+    self._obj = obj = self._getobj()
+/opt/miniconda3/envs/testbed/lib/python3.10/site-packages/_pytest/python.py:528: in _getobj
+    return self._importtestmodule()
+/opt/miniconda3/envs/testbed/lib/python3.10/site-packages/_pytest/python.py:617: in _importtestmodule
+    mod = import_path(self.path, mode=importmode, root=self.config.rootpath)
+/opt/miniconda3/envs/testbed/lib/python3.10/site-packages/_pytest/pathlib.py:565: in import_path
+    importlib.import_module(module_name)
+/opt/miniconda3/envs/testbed/lib/python3.10/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+<frozen importlib._bootstrap>:1050: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1027: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1006: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:688: in _load_unlocked
+    ???
+/opt/miniconda3/envs/testbed/lib/python3.10/site-packages/_pytest/assertion/rewrite.py:178: in exec_module
+    exec(co, module.__dict__)
+xarray/tests/test_dask.py:1051: in <module>
+    @pytest.mark.parametrize("obj", [make_ds(), make_da()])
+xarray/tests/test_dask.py:1005: in make_ds
+    map_ds["a"] = make_da()
+xarray/core/dataset.py:1449: in __setitem__
+    self.update({key: value})
+xarray/core/dataset.py:3927: in update
+    merge_result._variables = updated_vars
+E   AttributeError: '_MergeResult' object has no attribute '_variables'
+=============================== warnings summary ===============================
+xarray/__init__.py:1
+  /testbed/xarray/__init__.py:1: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+xarray/core/dask_array_compat.py:61
+xarray/core/dask_array_compat.py:61
+  /testbed/xarray/core/dask_array_compat.py:61: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+    if LooseVersion(dask_version) > LooseVersion("2.9.0"):
+
+xarray/core/pdcompat.py:45
+  /testbed/xarray/core/pdcompat.py:45: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+    if LooseVersion(pd.__version__) < "0.25.0":
+
+../opt/miniconda3/envs/testbed/lib/python3.10/site-packages/setuptools/_distutils/version.py:345
+../opt/miniconda3/envs/testbed/lib/python3.10/site-packages/setuptools/_distutils/version.py:345
+../opt/miniconda3/envs/testbed/lib/python3.10/site-packages/setuptools/_distutils/version.py:345
+../opt/miniconda3/envs/testbed/lib/python3.10/site-packages/setuptools/_distutils/version.py:345
+../opt/miniconda3/envs/testbed/lib/python3.10/site-packages/setuptools/_distutils/version.py:345
+../opt/miniconda3/envs/testbed/lib/python3.10/site-packages/setuptools/_distutils/version.py:345
+../opt/miniconda3/envs/testbed/lib/python3.10/site-packages/setuptools/_distutils/version.py:345
+  /opt/miniconda3/envs/testbed/lib/python3.10/site-packages/setuptools/_distutils/version.py:345: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+    other = LooseVersion(other)
+
+xarray/tests/__init__.py:59
+xarray/tests/__init__.py:59
+xarray/tests/__init__.py:59
+xarray/tests/__init__.py:59
+xarray/tests/__init__.py:59
+xarray/tests/__init__.py:59
+xarray/tests/__init__.py:59
+  /testbed/xarray/tests/__init__.py:59: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+    return version.LooseVersion(vstring)
+
+xarray/tests/test_dask.py:587
+  /testbed/xarray/tests/test_dask.py:587: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+    @pytest.mark.skipif(LooseVersion(dask.__version__) >= "2.0", reason="no meta")
+
+xarray/tests/test_dask.py:605
+  /testbed/xarray/tests/test_dask.py:605: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+    @pytest.mark.skipif(LooseVersion(dask.__version__) < "2.0", reason="needs meta")
+
+xarray/tests/test_dask.py:623
+  /testbed/xarray/tests/test_dask.py:623: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+    @pytest.mark.skipif(LooseVersion(dask.__version__) < "2.0", reason="needs meta")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR xarray/tests/test_dask.py - AttributeError: '_MergeResult' object has n...
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+======================== 21 warnings, 1 error in 4.65s =========================

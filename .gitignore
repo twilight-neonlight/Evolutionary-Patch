@@ -1,0 +1,22 @@
+# 실행·채점·보고 산출물
+runs/
+results/
+reports/
+# 데이터: 매니페스트만 추적
+data/*
+!data/MANIFEST
+# 서버별 설정·비밀값
+config/local.yaml
+config/main.yaml
+.env
+# 환경·캐시·로그
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+*.log
+# 제3자 연구 재현 테스트 산출물(로컬 사본, 커밋하지 않음)
+external/
+# 단위 테스트 입력 로그는 추적
+!tests/data/**/*.log

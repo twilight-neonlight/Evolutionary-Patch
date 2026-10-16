@@ -1,0 +1,99 @@
+# 단위 테스트용 설정(테스트가 기대하는 값). 본 실험 설정은 config/main.yaml.example.
+# null = 미결정. 코드가 해당 값을 읽으면 오류로 멈춘다(config.require).
+
+run:
+  run_id: null                    # 비우면 <model>_N<N>K<K>_<HHMMSS>
+  run_index: 0                    # A2 시드의 "실행 번호"
+  runs_dir: runs
+  instance_ids_file: null
+  issue_concurrency: 4
+
+data:
+  dataset: verified
+  parquet: data/SWE-bench_Verified/test.parquet
+  regression_pool: data/agentless/verified_select_regression.jsonl
+  exec_specs: data/exec_specs/verified.json
+
+llm:
+  base_url: http://localhost:8000/v1
+  model: qwen3-coder
+  context_window: 32768
+  http_timeout_s: 900
+  conn_retries: 3                 # 연결 오류·5xx 재시도 (유효성 재요청과 별개)
+  conn_backoff_s: 10              # 재시도 대기 (시도마다 배수)
+  sampling:                       # 1.4 [확정], B1. retry는 원래 단계 값(B3)
+    prep:      {temperature: 0.7, top_p: 1.0}
+    init:      {temperature: 0.7, top_p: 1.0}
+    crossover: {temperature: 0.5, top_p: 1.0}
+    mutation:  {temperature: 0.7, top_p: 1.0}
+  max_tokens:                     # 4.7 (임시, 파일럿 후 동결)
+    prep: 4096                    # B1
+    prep_files: 1024              # 2026-10-12 코드 입력: prep 1단계(후보 파일 목록) 응답 상한. 구현자 설정값
+    single_patch: 4096            # crossover / mutation / retry
+    init_per_patch: 1500          # A(2차 파일럿 임시값): min(context_window - 입력 - init_margin, N*init_per_patch)
+    init_margin: 512              # Q6
+
+algorithm:
+  N: 10
+  K: 5                            # 세대 0 포함
+  p_mut: 0.15
+  crossover_max_retries: 2        # 교배 유효성 재요청 (2절)
+  mutation_max_retries: 0         # A5: 변이 재요청 없음, 무효면 교배 자식으로 되돌림
+  init_shortfall_max_retries: 2   # A4
+  parent_redraw_max: 0            # A3: 같은 후보가 한 쌍에 뽑혀도 재추첨 없음(독립 추출)
+  min_valid_to_evolve: 2          # A6: 세대 0 유효 후보가 이 수 미만이면 진화 없음(0개 all_invalid, 1개 단독 평가)
+
+prep:
+  provider: simple
+  simple:
+    max_locations: 3              # Q5
+    allow_class_locations: true   # S3-(a): 클래스 식별자 → 클래스 본문 전체를 위치 범위로
+    candidate_files:              # 2026-10-12 코드 입력 1단계: 이슈 + 파일 트리 → 후보 파일
+      max_files: 3                # M (응답 앞에서부터 M줄만 봄)
+      selection: llm              # 후보 선택 방식 (구현: llm만)
+    code_input:                   # 2단계: 후보 파일 base commit 코드 + 이슈 → LOCATIONS + TEST
+      max_tokens: 12000           # 코드 입력 예산(토큰). 초과 시 full → skeleton → skeleton_drop → skeleton_truncated. 구현자 설정값
+    file_list:                    # S1-(d): 저장소 비테스트 .py 목록을 프롬프트에 (줄이는 단계: full→grouped→dirs→dirs_depth2)
+      enabled: true
+      max_tokens: 8000            # 구현자 설정값 기록
+    repro_paths:                  # A6 승인 (2026-10-08)
+      astropy/astropy: astropy/tests/test_swe_repro.py
+      scikit-learn/scikit-learn: sklearn/tests/test_swe_repro.py
+      matplotlib/matplotlib: lib/matplotlib/tests/test_swe_repro.py
+      pydata/xarray: xarray/tests/test_swe_repro.py
+      pylint-dev/pylint: tests/test_swe_repro.py
+      pytest-dev/pytest: testing/test_swe_repro.py
+      django/django: tests/swe_repro/tests.py
+      sympy/sympy: sympy/core/tests/test_swe_repro.py
+      # 아래 4개는 B4 기본값(A6 초안: pytest류는 저장소 테스트 디렉터리 아래 test_swe_repro.py)
+      sphinx-doc/sphinx: tests/test_swe_repro.py
+      mwaskom/seaborn: tests/test_swe_repro.py
+      pallets/flask: tests/test_swe_repro.py
+      psf/requests: tests/test_swe_repro.py
+
+executor:
+  repro_timeout_s: 120
+  regression_timeout_s: 600
+  setup_timeout_s: 1800           # 사전 명령(pip install 등) 안전 상한. 구현자 설정값 기록
+  max_parallel_containers: 16     # ≤ 48
+  regression_cap: null            # 4.9: 상한 없음
+  repro_on_base: true             # A5
+
+grading:
+  python: null
+  dataset_name: SWE-bench/SWE-bench_Verified
+  # 이미지: 데이터셋 image 필드(swebench/...)를 Docker Hub에서 pull (I1, 
+  max_workers: 16
+
+diagnostics:                      # 진단 전용 (결과 영향 없음, --resume 때 달라도 허용)
+  gen0_find_defs: false           # D-6: gen0 보고서에서 프롬프트에 없던 식별자를 저장소 전체 git grep으로 확인(컨테이너 추가 실행). 기본 off
+
+unattended:                       # B: 운영 값 (결과 영향 없음, --resume 때 달라도 허용)
+  issue_timeout_s: 3600           # B6 이슈 하나의 wall-clock 상한
+  infra_wait_max_s: 1800          # B5 인프라 오류 시 최대 대기
+  infra_poll_s: 60
+  disk_guard_gb: 120              # A1(2026-10-12): 고정 하한. 디스크 여유가 이 값(GB) 미만이면 새 이슈를 시작하지 않고 종료(exit 4)
+  image_unavailable_escalate_after: 5  # A2: 서로 다른 이슈에서 같은 원인의 image_unavailable이 연속 이 수면 infra_error로 승격
+  pull_min_interval_s: 0          # A4: 로컬에 없는 이미지 pull 사이 최소 간격(초). 0 = 기존 동작(docker run이 pull)
+  status_interval_s: 300          # B8
+  postprocess: false              # B9 종료 후 채점·보고서 자동 실행

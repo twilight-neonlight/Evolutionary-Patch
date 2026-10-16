@@ -1,0 +1,927 @@
+
+============================= test session starts ==============================
+platform linux -- Python 3.6.13, pytest-6.2.4, py-1.11.0, pluggy-0.13.1
+rootdir: /testbed, configfile: setup.cfg
+collected 60 items
+
+sklearn/metrics/cluster/tests/test_common.py ........................... [ 45%]
+.....................FFFFFFFF....                                        [100%]
+
+=================================== FAILURES ===================================
+__ test_inf_nan_input[adjusted_mutual_info_score-adjusted_mutual_info_score] ___
+
+metric_name = 'adjusted_mutual_info_score'
+metric_func = <function adjusted_mutual_info_score at 0x7b994f8a57b8>
+
+    @pytest.mark.parametrize(
+        "metric_name, metric_func",
+        dict(SUPERVISED_METRICS, **UNSUPERVISED_METRICS).items()
+    )
+    def test_inf_nan_input(metric_name, metric_func):
+        if metric_name in SUPERVISED_METRICS:
+            invalids = [([0, 1], [np.inf, np.inf]),
+                        ([0, 1], [np.nan, np.nan]),
+                        ([0, 1], [np.nan, np.inf])]
+        else:
+            X = np.random.randint(10, size=(2, 10))
+            invalids = [(X, [np.inf, np.inf]),
+                        (X, [np.nan, np.nan]),
+                        (X, [np.nan, np.inf])]
+        with pytest.raises(ValueError, match='contains NaN, infinity'):
+            for args in invalids:
+>               metric_func(*args)
+
+sklearn/metrics/cluster/tests/test_common.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sklearn/metrics/cluster/_supervised.py:735: in adjusted_mutual_info_score
+    labels_true, labels_pred = check_clusterings(labels_true, labels_pred)
+sklearn/metrics/cluster/_supervised.py:46: in check_clusterings
+    labels_pred = np.asarray(labels_pred, dtype=np.int64)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = [inf, inf], dtype = <class 'numpy.int64'>, order = None
+
+    @set_module('numpy')
+    def asarray(a, dtype=None, order=None):
+        """Convert the input to an array.
+    
+        Parameters
+        ----------
+        a : array_like
+            Input data, in any form that can be converted to an array.  This
+            includes lists, lists of tuples, tuples, tuples of tuples, tuples
+            of lists and ndarrays.
+        dtype : data-type, optional
+            By default, the data-type is inferred from the input data.
+        order : {'C', 'F'}, optional
+            Whether to use row-major (C-style) or
+            column-major (Fortran-style) memory representation.
+            Defaults to 'C'.
+    
+        Returns
+        -------
+        out : ndarray
+            Array interpretation of `a`.  No copy is performed if the input
+            is already an ndarray with matching dtype and order.  If `a` is a
+            subclass of ndarray, a base class ndarray is returned.
+    
+        See Also
+        --------
+        asanyarray : Similar function which passes through subclasses.
+        ascontiguousarray : Convert input to a contiguous array.
+        asfarray : Convert input to a floating point ndarray.
+        asfortranarray : Convert input to an ndarray with column-major
+                         memory order.
+        asarray_chkfinite : Similar function which checks input for NaNs and Infs.
+        fromiter : Create an array from an iterator.
+        fromfunction : Construct an array by executing a function on grid
+                       positions.
+    
+        Examples
+        --------
+        Convert a list into an array:
+    
+        >>> a = [1, 2]
+        >>> np.asarray(a)
+        array([1, 2])
+    
+        Existing arrays are not copied:
+    
+        >>> a = np.array([1, 2])
+        >>> np.asarray(a) is a
+        True
+    
+        If `dtype` is set, array is copied only if dtype does not match:
+    
+        >>> a = np.array([1, 2], dtype=np.float32)
+        >>> np.asarray(a, dtype=np.float32) is a
+        True
+        >>> np.asarray(a, dtype=np.float64) is a
+        False
+    
+        Contrary to `asanyarray`, ndarray subclasses are not passed through:
+    
+        >>> issubclass(np.recarray, np.ndarray)
+        True
+        >>> a = np.array([(1.0, 2), (3.0, 4)], dtype='f4,i4').view(np.recarray)
+        >>> np.asarray(a) is a
+        False
+        >>> np.asanyarray(a) is a
+        True
+    
+        """
+>       return array(a, dtype, copy=False, order=order)
+E       OverflowError: cannot convert float infinity to integer
+
+/opt/miniconda3/envs/testbed/lib/python3.6/site-packages/numpy/core/_asarray.py:83: OverflowError
+_________ test_inf_nan_input[adjusted_rand_score-adjusted_rand_score] __________
+
+metric_name = 'adjusted_rand_score'
+metric_func = <function adjusted_rand_score at 0x7b994f8a5488>
+
+    @pytest.mark.parametrize(
+        "metric_name, metric_func",
+        dict(SUPERVISED_METRICS, **UNSUPERVISED_METRICS).items()
+    )
+    def test_inf_nan_input(metric_name, metric_func):
+        if metric_name in SUPERVISED_METRICS:
+            invalids = [([0, 1], [np.inf, np.inf]),
+                        ([0, 1], [np.nan, np.nan]),
+                        ([0, 1], [np.nan, np.inf])]
+        else:
+            X = np.random.randint(10, size=(2, 10))
+            invalids = [(X, [np.inf, np.inf]),
+                        (X, [np.nan, np.nan]),
+                        (X, [np.nan, np.inf])]
+        with pytest.raises(ValueError, match='contains NaN, infinity'):
+            for args in invalids:
+>               metric_func(*args)
+
+sklearn/metrics/cluster/tests/test_common.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sklearn/metrics/cluster/_supervised.py:215: in adjusted_rand_score
+    labels_true, labels_pred = check_clusterings(labels_true, labels_pred)
+sklearn/metrics/cluster/_supervised.py:46: in check_clusterings
+    labels_pred = np.asarray(labels_pred, dtype=np.int64)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = [inf, inf], dtype = <class 'numpy.int64'>, order = None
+
+    @set_module('numpy')
+    def asarray(a, dtype=None, order=None):
+        """Convert the input to an array.
+    
+        Parameters
+        ----------
+        a : array_like
+            Input data, in any form that can be converted to an array.  This
+            includes lists, lists of tuples, tuples, tuples of tuples, tuples
+            of lists and ndarrays.
+        dtype : data-type, optional
+            By default, the data-type is inferred from the input data.
+        order : {'C', 'F'}, optional
+            Whether to use row-major (C-style) or
+            column-major (Fortran-style) memory representation.
+            Defaults to 'C'.
+    
+        Returns
+        -------
+        out : ndarray
+            Array interpretation of `a`.  No copy is performed if the input
+            is already an ndarray with matching dtype and order.  If `a` is a
+            subclass of ndarray, a base class ndarray is returned.
+    
+        See Also
+        --------
+        asanyarray : Similar function which passes through subclasses.
+        ascontiguousarray : Convert input to a contiguous array.
+        asfarray : Convert input to a floating point ndarray.
+        asfortranarray : Convert input to an ndarray with column-major
+                         memory order.
+        asarray_chkfinite : Similar function which checks input for NaNs and Infs.
+        fromiter : Create an array from an iterator.
+        fromfunction : Construct an array by executing a function on grid
+                       positions.
+    
+        Examples
+        --------
+        Convert a list into an array:
+    
+        >>> a = [1, 2]
+        >>> np.asarray(a)
+        array([1, 2])
+    
+        Existing arrays are not copied:
+    
+        >>> a = np.array([1, 2])
+        >>> np.asarray(a) is a
+        True
+    
+        If `dtype` is set, array is copied only if dtype does not match:
+    
+        >>> a = np.array([1, 2], dtype=np.float32)
+        >>> np.asarray(a, dtype=np.float32) is a
+        True
+        >>> np.asarray(a, dtype=np.float64) is a
+        False
+    
+        Contrary to `asanyarray`, ndarray subclasses are not passed through:
+    
+        >>> issubclass(np.recarray, np.ndarray)
+        True
+        >>> a = np.array([(1.0, 2), (3.0, 4)], dtype='f4,i4').view(np.recarray)
+        >>> np.asarray(a) is a
+        False
+        >>> np.asanyarray(a) is a
+        True
+    
+        """
+>       return array(a, dtype, copy=False, order=order)
+E       OverflowError: cannot convert float infinity to integer
+
+/opt/miniconda3/envs/testbed/lib/python3.6/site-packages/numpy/core/_asarray.py:83: OverflowError
+__________ test_inf_nan_input[completeness_score-completeness_score] ___________
+
+metric_name = 'completeness_score'
+metric_func = <function completeness_score at 0x7b994f8a5620>
+
+    @pytest.mark.parametrize(
+        "metric_name, metric_func",
+        dict(SUPERVISED_METRICS, **UNSUPERVISED_METRICS).items()
+    )
+    def test_inf_nan_input(metric_name, metric_func):
+        if metric_name in SUPERVISED_METRICS:
+            invalids = [([0, 1], [np.inf, np.inf]),
+                        ([0, 1], [np.nan, np.nan]),
+                        ([0, 1], [np.nan, np.inf])]
+        else:
+            X = np.random.randint(10, size=(2, 10))
+            invalids = [(X, [np.inf, np.inf]),
+                        (X, [np.nan, np.nan]),
+                        (X, [np.nan, np.inf])]
+        with pytest.raises(ValueError, match='contains NaN, infinity'):
+            for args in invalids:
+>               metric_func(*args)
+
+sklearn/metrics/cluster/tests/test_common.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sklearn/metrics/cluster/_supervised.py:458: in completeness_score
+    return homogeneity_completeness_v_measure(labels_true, labels_pred)[1]
+sklearn/metrics/cluster/_supervised.py:298: in homogeneity_completeness_v_measure
+    labels_true, labels_pred = check_clusterings(labels_true, labels_pred)
+sklearn/metrics/cluster/_supervised.py:46: in check_clusterings
+    labels_pred = np.asarray(labels_pred, dtype=np.int64)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = [inf, inf], dtype = <class 'numpy.int64'>, order = None
+
+    @set_module('numpy')
+    def asarray(a, dtype=None, order=None):
+        """Convert the input to an array.
+    
+        Parameters
+        ----------
+        a : array_like
+            Input data, in any form that can be converted to an array.  This
+            includes lists, lists of tuples, tuples, tuples of tuples, tuples
+            of lists and ndarrays.
+        dtype : data-type, optional
+            By default, the data-type is inferred from the input data.
+        order : {'C', 'F'}, optional
+            Whether to use row-major (C-style) or
+            column-major (Fortran-style) memory representation.
+            Defaults to 'C'.
+    
+        Returns
+        -------
+        out : ndarray
+            Array interpretation of `a`.  No copy is performed if the input
+            is already an ndarray with matching dtype and order.  If `a` is a
+            subclass of ndarray, a base class ndarray is returned.
+    
+        See Also
+        --------
+        asanyarray : Similar function which passes through subclasses.
+        ascontiguousarray : Convert input to a contiguous array.
+        asfarray : Convert input to a floating point ndarray.
+        asfortranarray : Convert input to an ndarray with column-major
+                         memory order.
+        asarray_chkfinite : Similar function which checks input for NaNs and Infs.
+        fromiter : Create an array from an iterator.
+        fromfunction : Construct an array by executing a function on grid
+                       positions.
+    
+        Examples
+        --------
+        Convert a list into an array:
+    
+        >>> a = [1, 2]
+        >>> np.asarray(a)
+        array([1, 2])
+    
+        Existing arrays are not copied:
+    
+        >>> a = np.array([1, 2])
+        >>> np.asarray(a) is a
+        True
+    
+        If `dtype` is set, array is copied only if dtype does not match:
+    
+        >>> a = np.array([1, 2], dtype=np.float32)
+        >>> np.asarray(a, dtype=np.float32) is a
+        True
+        >>> np.asarray(a, dtype=np.float64) is a
+        False
+    
+        Contrary to `asanyarray`, ndarray subclasses are not passed through:
+    
+        >>> issubclass(np.recarray, np.ndarray)
+        True
+        >>> a = np.array([(1.0, 2), (3.0, 4)], dtype='f4,i4').view(np.recarray)
+        >>> np.asarray(a) is a
+        False
+        >>> np.asanyarray(a) is a
+        True
+    
+        """
+>       return array(a, dtype, copy=False, order=order)
+E       OverflowError: cannot convert float infinity to integer
+
+/opt/miniconda3/envs/testbed/lib/python3.6/site-packages/numpy/core/_asarray.py:83: OverflowError
+___________ test_inf_nan_input[homogeneity_score-homogeneity_score] ____________
+
+metric_name = 'homogeneity_score'
+metric_func = <function homogeneity_score at 0x7b994f8a5598>
+
+    @pytest.mark.parametrize(
+        "metric_name, metric_func",
+        dict(SUPERVISED_METRICS, **UNSUPERVISED_METRICS).items()
+    )
+    def test_inf_nan_input(metric_name, metric_func):
+        if metric_name in SUPERVISED_METRICS:
+            invalids = [([0, 1], [np.inf, np.inf]),
+                        ([0, 1], [np.nan, np.nan]),
+                        ([0, 1], [np.nan, np.inf])]
+        else:
+            X = np.random.randint(10, size=(2, 10))
+            invalids = [(X, [np.inf, np.inf]),
+                        (X, [np.nan, np.nan]),
+                        (X, [np.nan, np.inf])]
+        with pytest.raises(ValueError, match='contains NaN, infinity'):
+            for args in invalids:
+>               metric_func(*args)
+
+sklearn/metrics/cluster/tests/test_common.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sklearn/metrics/cluster/_supervised.py:388: in homogeneity_score
+    return homogeneity_completeness_v_measure(labels_true, labels_pred)[0]
+sklearn/metrics/cluster/_supervised.py:298: in homogeneity_completeness_v_measure
+    labels_true, labels_pred = check_clusterings(labels_true, labels_pred)
+sklearn/metrics/cluster/_supervised.py:46: in check_clusterings
+    labels_pred = np.asarray(labels_pred, dtype=np.int64)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = [inf, inf], dtype = <class 'numpy.int64'>, order = None
+
+    @set_module('numpy')
+    def asarray(a, dtype=None, order=None):
+        """Convert the input to an array.
+    
+        Parameters
+        ----------
+        a : array_like
+            Input data, in any form that can be converted to an array.  This
+            includes lists, lists of tuples, tuples, tuples of tuples, tuples
+            of lists and ndarrays.
+        dtype : data-type, optional
+            By default, the data-type is inferred from the input data.
+        order : {'C', 'F'}, optional
+            Whether to use row-major (C-style) or
+            column-major (Fortran-style) memory representation.
+            Defaults to 'C'.
+    
+        Returns
+        -------
+        out : ndarray
+            Array interpretation of `a`.  No copy is performed if the input
+            is already an ndarray with matching dtype and order.  If `a` is a
+            subclass of ndarray, a base class ndarray is returned.
+    
+        See Also
+        --------
+        asanyarray : Similar function which passes through subclasses.
+        ascontiguousarray : Convert input to a contiguous array.
+        asfarray : Convert input to a floating point ndarray.
+        asfortranarray : Convert input to an ndarray with column-major
+                         memory order.
+        asarray_chkfinite : Similar function which checks input for NaNs and Infs.
+        fromiter : Create an array from an iterator.
+        fromfunction : Construct an array by executing a function on grid
+                       positions.
+    
+        Examples
+        --------
+        Convert a list into an array:
+    
+        >>> a = [1, 2]
+        >>> np.asarray(a)
+        array([1, 2])
+    
+        Existing arrays are not copied:
+    
+        >>> a = np.array([1, 2])
+        >>> np.asarray(a) is a
+        True
+    
+        If `dtype` is set, array is copied only if dtype does not match:
+    
+        >>> a = np.array([1, 2], dtype=np.float32)
+        >>> np.asarray(a, dtype=np.float32) is a
+        True
+        >>> np.asarray(a, dtype=np.float64) is a
+        False
+    
+        Contrary to `asanyarray`, ndarray subclasses are not passed through:
+    
+        >>> issubclass(np.recarray, np.ndarray)
+        True
+        >>> a = np.array([(1.0, 2), (3.0, 4)], dtype='f4,i4').view(np.recarray)
+        >>> np.asarray(a) is a
+        False
+        >>> np.asanyarray(a) is a
+        True
+    
+        """
+>       return array(a, dtype, copy=False, order=order)
+E       OverflowError: cannot convert float infinity to integer
+
+/opt/miniconda3/envs/testbed/lib/python3.6/site-packages/numpy/core/_asarray.py:83: OverflowError
+___________ test_inf_nan_input[mutual_info_score-mutual_info_score] ____________
+
+metric_name = 'mutual_info_score'
+metric_func = <function mutual_info_score at 0x7b994f8a5730>
+
+    @pytest.mark.parametrize(
+        "metric_name, metric_func",
+        dict(SUPERVISED_METRICS, **UNSUPERVISED_METRICS).items()
+    )
+    def test_inf_nan_input(metric_name, metric_func):
+        if metric_name in SUPERVISED_METRICS:
+            invalids = [([0, 1], [np.inf, np.inf]),
+                        ([0, 1], [np.nan, np.nan]),
+                        ([0, 1], [np.nan, np.inf])]
+        else:
+            X = np.random.randint(10, size=(2, 10))
+            invalids = [(X, [np.inf, np.inf]),
+                        (X, [np.nan, np.nan]),
+                        (X, [np.nan, np.inf])]
+        with pytest.raises(ValueError, match='contains NaN, infinity'):
+            for args in invalids:
+>               metric_func(*args)
+
+sklearn/metrics/cluster/tests/test_common.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sklearn/metrics/cluster/_supervised.py:615: in mutual_info_score
+    labels_true, labels_pred = check_clusterings(labels_true, labels_pred)
+sklearn/metrics/cluster/_supervised.py:46: in check_clusterings
+    labels_pred = np.asarray(labels_pred, dtype=np.int64)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = [inf, inf], dtype = <class 'numpy.int64'>, order = None
+
+    @set_module('numpy')
+    def asarray(a, dtype=None, order=None):
+        """Convert the input to an array.
+    
+        Parameters
+        ----------
+        a : array_like
+            Input data, in any form that can be converted to an array.  This
+            includes lists, lists of tuples, tuples, tuples of tuples, tuples
+            of lists and ndarrays.
+        dtype : data-type, optional
+            By default, the data-type is inferred from the input data.
+        order : {'C', 'F'}, optional
+            Whether to use row-major (C-style) or
+            column-major (Fortran-style) memory representation.
+            Defaults to 'C'.
+    
+        Returns
+        -------
+        out : ndarray
+            Array interpretation of `a`.  No copy is performed if the input
+            is already an ndarray with matching dtype and order.  If `a` is a
+            subclass of ndarray, a base class ndarray is returned.
+    
+        See Also
+        --------
+        asanyarray : Similar function which passes through subclasses.
+        ascontiguousarray : Convert input to a contiguous array.
+        asfarray : Convert input to a floating point ndarray.
+        asfortranarray : Convert input to an ndarray with column-major
+                         memory order.
+        asarray_chkfinite : Similar function which checks input for NaNs and Infs.
+        fromiter : Create an array from an iterator.
+        fromfunction : Construct an array by executing a function on grid
+                       positions.
+    
+        Examples
+        --------
+        Convert a list into an array:
+    
+        >>> a = [1, 2]
+        >>> np.asarray(a)
+        array([1, 2])
+    
+        Existing arrays are not copied:
+    
+        >>> a = np.array([1, 2])
+        >>> np.asarray(a) is a
+        True
+    
+        If `dtype` is set, array is copied only if dtype does not match:
+    
+        >>> a = np.array([1, 2], dtype=np.float32)
+        >>> np.asarray(a, dtype=np.float32) is a
+        True
+        >>> np.asarray(a, dtype=np.float64) is a
+        False
+    
+        Contrary to `asanyarray`, ndarray subclasses are not passed through:
+    
+        >>> issubclass(np.recarray, np.ndarray)
+        True
+        >>> a = np.array([(1.0, 2), (3.0, 4)], dtype='f4,i4').view(np.recarray)
+        >>> np.asarray(a) is a
+        False
+        >>> np.asanyarray(a) is a
+        True
+    
+        """
+>       return array(a, dtype, copy=False, order=order)
+E       OverflowError: cannot convert float infinity to integer
+
+/opt/miniconda3/envs/testbed/lib/python3.6/site-packages/numpy/core/_asarray.py:83: OverflowError
+_ test_inf_nan_input[normalized_mutual_info_score-normalized_mutual_info_score] _
+
+metric_name = 'normalized_mutual_info_score'
+metric_func = <function normalized_mutual_info_score at 0x7b994f8a5840>
+
+    @pytest.mark.parametrize(
+        "metric_name, metric_func",
+        dict(SUPERVISED_METRICS, **UNSUPERVISED_METRICS).items()
+    )
+    def test_inf_nan_input(metric_name, metric_func):
+        if metric_name in SUPERVISED_METRICS:
+            invalids = [([0, 1], [np.inf, np.inf]),
+                        ([0, 1], [np.nan, np.nan]),
+                        ([0, 1], [np.nan, np.inf])]
+        else:
+            X = np.random.randint(10, size=(2, 10))
+            invalids = [(X, [np.inf, np.inf]),
+                        (X, [np.nan, np.nan]),
+                        (X, [np.nan, np.inf])]
+        with pytest.raises(ValueError, match='contains NaN, infinity'):
+            for args in invalids:
+>               metric_func(*args)
+
+sklearn/metrics/cluster/tests/test_common.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sklearn/metrics/cluster/_supervised.py:844: in normalized_mutual_info_score
+    labels_true, labels_pred = check_clusterings(labels_true, labels_pred)
+sklearn/metrics/cluster/_supervised.py:46: in check_clusterings
+    labels_pred = np.asarray(labels_pred, dtype=np.int64)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = [inf, inf], dtype = <class 'numpy.int64'>, order = None
+
+    @set_module('numpy')
+    def asarray(a, dtype=None, order=None):
+        """Convert the input to an array.
+    
+        Parameters
+        ----------
+        a : array_like
+            Input data, in any form that can be converted to an array.  This
+            includes lists, lists of tuples, tuples, tuples of tuples, tuples
+            of lists and ndarrays.
+        dtype : data-type, optional
+            By default, the data-type is inferred from the input data.
+        order : {'C', 'F'}, optional
+            Whether to use row-major (C-style) or
+            column-major (Fortran-style) memory representation.
+            Defaults to 'C'.
+    
+        Returns
+        -------
+        out : ndarray
+            Array interpretation of `a`.  No copy is performed if the input
+            is already an ndarray with matching dtype and order.  If `a` is a
+            subclass of ndarray, a base class ndarray is returned.
+    
+        See Also
+        --------
+        asanyarray : Similar function which passes through subclasses.
+        ascontiguousarray : Convert input to a contiguous array.
+        asfarray : Convert input to a floating point ndarray.
+        asfortranarray : Convert input to an ndarray with column-major
+                         memory order.
+        asarray_chkfinite : Similar function which checks input for NaNs and Infs.
+        fromiter : Create an array from an iterator.
+        fromfunction : Construct an array by executing a function on grid
+                       positions.
+    
+        Examples
+        --------
+        Convert a list into an array:
+    
+        >>> a = [1, 2]
+        >>> np.asarray(a)
+        array([1, 2])
+    
+        Existing arrays are not copied:
+    
+        >>> a = np.array([1, 2])
+        >>> np.asarray(a) is a
+        True
+    
+        If `dtype` is set, array is copied only if dtype does not match:
+    
+        >>> a = np.array([1, 2], dtype=np.float32)
+        >>> np.asarray(a, dtype=np.float32) is a
+        True
+        >>> np.asarray(a, dtype=np.float64) is a
+        False
+    
+        Contrary to `asanyarray`, ndarray subclasses are not passed through:
+    
+        >>> issubclass(np.recarray, np.ndarray)
+        True
+        >>> a = np.array([(1.0, 2), (3.0, 4)], dtype='f4,i4').view(np.recarray)
+        >>> np.asarray(a) is a
+        False
+        >>> np.asanyarray(a) is a
+        True
+    
+        """
+>       return array(a, dtype, copy=False, order=order)
+E       OverflowError: cannot convert float infinity to integer
+
+/opt/miniconda3/envs/testbed/lib/python3.6/site-packages/numpy/core/_asarray.py:83: OverflowError
+_____________ test_inf_nan_input[v_measure_score-v_measure_score] ______________
+
+metric_name = 'v_measure_score'
+metric_func = <function v_measure_score at 0x7b994f8a56a8>
+
+    @pytest.mark.parametrize(
+        "metric_name, metric_func",
+        dict(SUPERVISED_METRICS, **UNSUPERVISED_METRICS).items()
+    )
+    def test_inf_nan_input(metric_name, metric_func):
+        if metric_name in SUPERVISED_METRICS:
+            invalids = [([0, 1], [np.inf, np.inf]),
+                        ([0, 1], [np.nan, np.nan]),
+                        ([0, 1], [np.nan, np.inf])]
+        else:
+            X = np.random.randint(10, size=(2, 10))
+            invalids = [(X, [np.inf, np.inf]),
+                        (X, [np.nan, np.nan]),
+                        (X, [np.nan, np.inf])]
+        with pytest.raises(ValueError, match='contains NaN, infinity'):
+            for args in invalids:
+>               metric_func(*args)
+
+sklearn/metrics/cluster/tests/test_common.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sklearn/metrics/cluster/_supervised.py:558: in v_measure_score
+    beta=beta)[2]
+sklearn/metrics/cluster/_supervised.py:298: in homogeneity_completeness_v_measure
+    labels_true, labels_pred = check_clusterings(labels_true, labels_pred)
+sklearn/metrics/cluster/_supervised.py:46: in check_clusterings
+    labels_pred = np.asarray(labels_pred, dtype=np.int64)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = [inf, inf], dtype = <class 'numpy.int64'>, order = None
+
+    @set_module('numpy')
+    def asarray(a, dtype=None, order=None):
+        """Convert the input to an array.
+    
+        Parameters
+        ----------
+        a : array_like
+            Input data, in any form that can be converted to an array.  This
+            includes lists, lists of tuples, tuples, tuples of tuples, tuples
+            of lists and ndarrays.
+        dtype : data-type, optional
+            By default, the data-type is inferred from the input data.
+        order : {'C', 'F'}, optional
+            Whether to use row-major (C-style) or
+            column-major (Fortran-style) memory representation.
+            Defaults to 'C'.
+    
+        Returns
+        -------
+        out : ndarray
+            Array interpretation of `a`.  No copy is performed if the input
+            is already an ndarray with matching dtype and order.  If `a` is a
+            subclass of ndarray, a base class ndarray is returned.
+    
+        See Also
+        --------
+        asanyarray : Similar function which passes through subclasses.
+        ascontiguousarray : Convert input to a contiguous array.
+        asfarray : Convert input to a floating point ndarray.
+        asfortranarray : Convert input to an ndarray with column-major
+                         memory order.
+        asarray_chkfinite : Similar function which checks input for NaNs and Infs.
+        fromiter : Create an array from an iterator.
+        fromfunction : Construct an array by executing a function on grid
+                       positions.
+    
+        Examples
+        --------
+        Convert a list into an array:
+    
+        >>> a = [1, 2]
+        >>> np.asarray(a)
+        array([1, 2])
+    
+        Existing arrays are not copied:
+    
+        >>> a = np.array([1, 2])
+        >>> np.asarray(a) is a
+        True
+    
+        If `dtype` is set, array is copied only if dtype does not match:
+    
+        >>> a = np.array([1, 2], dtype=np.float32)
+        >>> np.asarray(a, dtype=np.float32) is a
+        True
+        >>> np.asarray(a, dtype=np.float64) is a
+        False
+    
+        Contrary to `asanyarray`, ndarray subclasses are not passed through:
+    
+        >>> issubclass(np.recarray, np.ndarray)
+        True
+        >>> a = np.array([(1.0, 2), (3.0, 4)], dtype='f4,i4').view(np.recarray)
+        >>> np.asarray(a) is a
+        False
+        >>> np.asanyarray(a) is a
+        True
+    
+        """
+>       return array(a, dtype, copy=False, order=order)
+E       OverflowError: cannot convert float infinity to integer
+
+/opt/miniconda3/envs/testbed/lib/python3.6/site-packages/numpy/core/_asarray.py:83: OverflowError
+_______ test_inf_nan_input[fowlkes_mallows_score-fowlkes_mallows_score] ________
+
+metric_name = 'fowlkes_mallows_score'
+metric_func = <function fowlkes_mallows_score at 0x7b994f8a58c8>
+
+    @pytest.mark.parametrize(
+        "metric_name, metric_func",
+        dict(SUPERVISED_METRICS, **UNSUPERVISED_METRICS).items()
+    )
+    def test_inf_nan_input(metric_name, metric_func):
+        if metric_name in SUPERVISED_METRICS:
+            invalids = [([0, 1], [np.inf, np.inf]),
+                        ([0, 1], [np.nan, np.nan]),
+                        ([0, 1], [np.nan, np.inf])]
+        else:
+            X = np.random.randint(10, size=(2, 10))
+            invalids = [(X, [np.inf, np.inf]),
+                        (X, [np.nan, np.nan]),
+                        (X, [np.nan, np.inf])]
+        with pytest.raises(ValueError, match='contains NaN, infinity'):
+            for args in invalids:
+>               metric_func(*args)
+
+sklearn/metrics/cluster/tests/test_common.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sklearn/metrics/cluster/_supervised.py:933: in fowlkes_mallows_score
+    labels_true, labels_pred = check_clusterings(labels_true, labels_pred)
+sklearn/metrics/cluster/_supervised.py:46: in check_clusterings
+    labels_pred = np.asarray(labels_pred, dtype=np.int64)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = [inf, inf], dtype = <class 'numpy.int64'>, order = None
+
+    @set_module('numpy')
+    def asarray(a, dtype=None, order=None):
+        """Convert the input to an array.
+    
+        Parameters
+        ----------
+        a : array_like
+            Input data, in any form that can be converted to an array.  This
+            includes lists, lists of tuples, tuples, tuples of tuples, tuples
+            of lists and ndarrays.
+        dtype : data-type, optional
+            By default, the data-type is inferred from the input data.
+        order : {'C', 'F'}, optional
+            Whether to use row-major (C-style) or
+            column-major (Fortran-style) memory representation.
+            Defaults to 'C'.
+    
+        Returns
+        -------
+        out : ndarray
+            Array interpretation of `a`.  No copy is performed if the input
+            is already an ndarray with matching dtype and order.  If `a` is a
+            subclass of ndarray, a base class ndarray is returned.
+    
+        See Also
+        --------
+        asanyarray : Similar function which passes through subclasses.
+        ascontiguousarray : Convert input to a contiguous array.
+        asfarray : Convert input to a floating point ndarray.
+        asfortranarray : Convert input to an ndarray with column-major
+                         memory order.
+        asarray_chkfinite : Similar function which checks input for NaNs and Infs.
+        fromiter : Create an array from an iterator.
+        fromfunction : Construct an array by executing a function on grid
+                       positions.
+    
+        Examples
+        --------
+        Convert a list into an array:
+    
+        >>> a = [1, 2]
+        >>> np.asarray(a)
+        array([1, 2])
+    
+        Existing arrays are not copied:
+    
+        >>> a = np.array([1, 2])
+        >>> np.asarray(a) is a
+        True
+    
+        If `dtype` is set, array is copied only if dtype does not match:
+    
+        >>> a = np.array([1, 2], dtype=np.float32)
+        >>> np.asarray(a, dtype=np.float32) is a
+        True
+        >>> np.asarray(a, dtype=np.float64) is a
+        False
+    
+        Contrary to `asanyarray`, ndarray subclasses are not passed through:
+    
+        >>> issubclass(np.recarray, np.ndarray)
+        True
+        >>> a = np.array([(1.0, 2), (3.0, 4)], dtype='f4,i4').view(np.recarray)
+        >>> np.asarray(a) is a
+        False
+        >>> np.asanyarray(a) is a
+        True
+    
+        """
+>       return array(a, dtype, copy=False, order=order)
+E       OverflowError: cannot convert float infinity to integer
+
+/opt/miniconda3/envs/testbed/lib/python3.6/site-packages/numpy/core/_asarray.py:83: OverflowError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_symmetric_non_symmetric_union
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_symmetry[adjusted_rand_score-y10-y20]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_symmetry[v_measure_score-y11-y21]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_symmetry[mutual_info_score-y12-y22]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_symmetry[adjusted_mutual_info_score-y13-y23]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_symmetry[normalized_mutual_info_score-y14-y24]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_symmetry[fowlkes_mallows_score-y15-y25]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_non_symmetry[homogeneity_score-y10-y20]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_non_symmetry[completeness_score-y11-y21]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_normalized_output[adjusted_rand_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_normalized_output[homogeneity_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_normalized_output[completeness_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_normalized_output[v_measure_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_normalized_output[adjusted_mutual_info_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_normalized_output[fowlkes_mallows_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_normalized_output[normalized_mutual_info_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_permute_labels[adjusted_mutual_info_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_permute_labels[adjusted_rand_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_permute_labels[completeness_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_permute_labels[homogeneity_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_permute_labels[mutual_info_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_permute_labels[normalized_mutual_info_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_permute_labels[v_measure_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_permute_labels[fowlkes_mallows_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_permute_labels[silhouette_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_permute_labels[silhouette_manhattan]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_permute_labels[calinski_harabasz_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_permute_labels[davies_bouldin_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_format_invariance[adjusted_mutual_info_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_format_invariance[adjusted_rand_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_format_invariance[completeness_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_format_invariance[homogeneity_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_format_invariance[mutual_info_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_format_invariance[normalized_mutual_info_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_format_invariance[v_measure_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_format_invariance[fowlkes_mallows_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_format_invariance[silhouette_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_format_invariance[silhouette_manhattan]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_format_invariance[calinski_harabasz_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_format_invariance[davies_bouldin_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_single_sample[adjusted_mutual_info_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_single_sample[adjusted_rand_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_single_sample[completeness_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_single_sample[homogeneity_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_single_sample[mutual_info_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_single_sample[normalized_mutual_info_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_single_sample[v_measure_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_single_sample[fowlkes_mallows_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_inf_nan_input[silhouette_score-silhouette_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_inf_nan_input[silhouette_manhattan-metric_func9]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_inf_nan_input[calinski_harabasz_score-calinski_harabasz_score]
+PASSED sklearn/metrics/cluster/tests/test_common.py::test_inf_nan_input[davies_bouldin_score-davies_bouldin_score]
+FAILED sklearn/metrics/cluster/tests/test_common.py::test_inf_nan_input[adjusted_mutual_info_score-adjusted_mutual_info_score]
+FAILED sklearn/metrics/cluster/tests/test_common.py::test_inf_nan_input[adjusted_rand_score-adjusted_rand_score]
+FAILED sklearn/metrics/cluster/tests/test_common.py::test_inf_nan_input[completeness_score-completeness_score]
+FAILED sklearn/metrics/cluster/tests/test_common.py::test_inf_nan_input[homogeneity_score-homogeneity_score]
+FAILED sklearn/metrics/cluster/tests/test_common.py::test_inf_nan_input[mutual_info_score-mutual_info_score]
+FAILED sklearn/metrics/cluster/tests/test_common.py::test_inf_nan_input[normalized_mutual_info_score-normalized_mutual_info_score]
+FAILED sklearn/metrics/cluster/tests/test_common.py::test_inf_nan_input[v_measure_score-v_measure_score]
+FAILED sklearn/metrics/cluster/tests/test_common.py::test_inf_nan_input[fowlkes_mallows_score-fowlkes_mallows_score]
+========================= 8 failed, 52 passed in 0.33s =========================

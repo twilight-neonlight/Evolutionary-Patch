@@ -1,0 +1,17 @@
+
+Traceback (most recent call last):
+  File "/testbed/bin/test", line 95, in <module>
+    import sympy
+  File "/testbed/sympy/__init__.py", line 51, in <module>
+    from .core import (sympify, SympifyError, cacheit, Basic, Atom,
+  File "/testbed/sympy/core/__init__.py", line 9, in <module>
+    from .expr import Expr, AtomicExpr, UnevaluatedExpr
+  File "/testbed/sympy/core/expr.py", line 4079, in <module>
+    from .mul import Mul
+  File "/testbed/sympy/core/mul.py", line 88, in <module>
+    class Mul(Expr, AssocOp):
+  File "/testbed/sympy/core/mul.py", line 157, in Mul
+    _kind_dispatcher = KindDispatcher("Mul_kind_dispatcher", commutative=True)
+  File "/testbed/sympy/core/kind.py", line 264, in __init__
+    self.register(MatrixKind, UndefinedKind)(lambda prev, kind: MatrixKind(kind))
+NameError: name 'MatrixKind' is not defined

@@ -1,0 +1,711 @@
+
+<frozen importlib._bootstrap>:228: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility. Expected 80 from C header, got 96 from PyObject
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.9.20, pytest-7.4.0, pluggy-1.3.0
+
+Running tests with Astropy version 5.3.dev883+g7983109b6.d20261016.
+Running tests in astropy/io/ascii/tests/test_qdp.py.
+
+Date: 2026-10-16T04:37:01
+
+Platform: Linux-6.17.0-35-generic-x86_64-with-glibc2.35
+
+Executable: /opt/miniconda3/envs/testbed/bin/python
+
+Full Python Version: 
+3.9.20 (main, Oct  3 2024, 07:27:41) 
+[GCC 11.2.0]
+
+encodings: sys: utf-8, locale: UTF-8, filesystem: utf-8
+byteorder: little
+float info: dig: 15, mant_dig: 15
+
+Package versions: 
+Numpy: 1.25.2
+Scipy: not available
+Matplotlib: not available
+h5py: not available
+Pandas: not available
+PyERFA: 2.0.0.3
+Cython: not available
+Scikit-image: not available
+asdf: not available
+pyarrow: not available
+
+Using Astropy options: remote_data: none.
+
+CI: undefined
+ARCH_ON_CI: undefined
+IS_CRON: undefined
+
+rootdir: /testbed
+configfile: setup.cfg
+plugins: xdist-3.3.1, doctestplus-1.0.0, astropy-0.10.0, filter-subpackage-0.1.2, remotedata-0.4.0, openfiles-0.5.0, hypothesis-6.82.6, arraydiff-0.5.0, astropy-header-0.2.2, cov-4.1.0, mock-3.11.1
+collected 8 items
+
+astropy/io/ascii/tests/test_qdp.py [31mF[0m[31mF[0m[31mF[0m[31mF[0m[31mF[0m[31mF[0m[31mF[0m[32m.[0m[31m                              [100%][0m
+
+=================================== FAILURES ===================================
+[31m[1m________________________ test_get_tables_from_qdp_file _________________________[0m
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/test_get_tables_from_qdp_file0')
+
+    def test_get_tables_from_qdp_file(tmp_path):
+        example_qdp = """
+        ! Swift/XRT hardness ratio of trigger: XXXX, name: BUBU X-2
+        ! Columns are as labelled
+        READ TERR 1
+        READ SERR 2
+        ! WT -- hard data
+        !MJD            Err (pos)       Err(neg)        Rate            Error
+        53000.123456 2.37847222222222e-05    -2.37847222222222e-05   -0.212439       0.212439
+        55045.099887 1.14467592592593e-05    -1.14467592592593e-05   0.000000        0.000000
+        NO NO NO NO NO
+        ! WT -- soft data
+        !MJD            Err (pos)       Err(neg)        Rate            Error
+        53000.123456 2.37847222222222e-05    -2.37847222222222e-05   0.726155        0.583890
+        55045.099887 1.14467592592593e-05    -1.14467592592593e-05   2.410935        1.393592
+        NO NO NO NO NO
+        ! WT -- hardness ratio
+        !MJD            Err (pos)       Err(neg)        Rate            Error
+        53000.123456 2.37847222222222e-05    -2.37847222222222e-05   -0.292553       -0.374935
+        55045.099887 1.14467592592593e-05    -1.14467592592593e-05   0.000000        -nan
+        """
+    
+        path = tmp_path / "test.qdp"
+    
+        with open(path, "w") as fp:
+            print(example_qdp, file=fp)
+    
+>       table0 = _read_table_qdp(fp.name, names=["MJD", "Rate"], table_id=0)
+
+[1m[31mastropy/io/ascii/tests/test_qdp.py[0m:37: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+[1m[31mastropy/io/ascii/qdp.py[0m:420: in _read_table_qdp
+    tables = _get_tables_from_qdp_file(
+[1m[31mastropy/io/ascii/qdp.py[0m:261: in _get_tables_from_qdp_file
+    contents, ncol = _get_type_from_list_of_lines(lines, delimiter=delimiter)
+[1m[31mastropy/io/ascii/qdp.py[0m:124: in _get_type_from_list_of_lines
+    types = [_line_type(line, delimiter=delimiter) for line in lines]
+[1m[31mastropy/io/ascii/qdp.py[0m:124: in <listcomp>
+    types = [_line_type(line, delimiter=delimiter) for line in lines]
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+line = '', delimiter = None
+
+    def _line_type(line, delimiter=None):
+        """Interpret a QDP file line.
+    
+        Parameters
+        ----------
+        line : str
+            a single line of the file
+    
+        Returns
+        -------
+        type : str
+            Line type: "comment", "command", or "data"
+    
+        Examples
+        --------
+        >>> _line_type("READ SERR 3")
+        'command'
+        >>> _line_type(" \\n    !some gibberish")
+        'comment'
+        >>> _line_type("   ")
+        'comment'
+        >>> _line_type(" 21345.45")
+        'data,1'
+        >>> _line_type(" 21345.45 1.53e-3 1e-3 .04 NO nan")
+        'data,6'
+        >>> _line_type(" 21345.45,1.53e-3,1e-3,.04,NO,nan", delimiter=',')
+        'data,6'
+        >>> _line_type(" 21345.45 ! a comment to disturb")
+        'data,1'
+        >>> _line_type("NO NO NO NO NO")
+        'new'
+        >>> _line_type("NO,NO,NO,NO,NO", delimiter=',')
+        'new'
+        >>> _line_type("N O N NOON OON O")
+        Traceback (most recent call last):
+            ...
+        ValueError: Unrecognized QDP line...
+        >>> _line_type(" some non-comment gibberish")
+        Traceback (most recent call last):
+            ...
+        ValueError: Unrecognized QDP line...
+        """
+        _decimal_re = r"[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?"
+        _command_re = r"READ [TS]ERR(\s+[0-9]+)+"
+>       _type_re = rf"^\s*((?P<command>{_command_re})|(?P<new>{_new_re})|(?P<data>{_data_re})?\s*(\!(?P<comment>.*))?\s*$"
+[1m[31mE       UnboundLocalError: local variable '_new_re' referenced before assignment[0m
+
+[1m[31mastropy/io/ascii/qdp.py[0m:64: UnboundLocalError
+[31m[1m________________________________ test_roundtrip ________________________________[0m
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/test_roundtrip0')
+
+    def test_roundtrip(tmp_path):
+        example_qdp = """
+        ! Swift/XRT hardness ratio of trigger: XXXX, name: BUBU X-2
+        ! Columns are as labelled
+        READ TERR 1
+        READ SERR 2
+        ! WT -- hard data
+        !MJD            Err (pos)       Err(neg)        Rate            Error
+        53000.123456 2.37847222222222e-05    -2.37847222222222e-05   NO       0.212439
+        55045.099887 1.14467592592593e-05    -1.14467592592593e-05   0.000000        0.000000
+        NO NO NO NO NO
+        ! WT -- soft data
+        !MJD            Err (pos)       Err(neg)        Rate            Error
+        53000.123456 2.37847222222222e-05    -2.37847222222222e-05   0.726155        0.583890
+        55045.099887 1.14467592592593e-05    -1.14467592592593e-05   2.410935        1.393592
+        NO NO NO NO NO
+        ! WT -- hardness ratio
+        !MJD            Err (pos)       Err(neg)        Rate            Error
+        53000.123456 2.37847222222222e-05    -2.37847222222222e-05   -0.292553       -0.374935
+        55045.099887 1.14467592592593e-05    -1.14467592592593e-05   0.000000        NO
+        ! Add command, just to raise the warning.
+        READ TERR 1
+        ! WT -- whatever
+        !MJD            Err (pos)       Err(neg)        Rate            Error
+        53000.123456 2.37847222222222e-05    -2.37847222222222e-05   -0.292553       -0.374935
+        NO 1.14467592592593e-05    -1.14467592592593e-05   0.000000        NO
+        """
+    
+        path = str(tmp_path / "test.qdp")
+        path2 = str(tmp_path / "test2.qdp")
+    
+        with open(path, "w") as fp:
+            print(example_qdp, file=fp)
+        with pytest.warns(AstropyUserWarning) as record:
+>           table = _read_table_qdp(path, names=["MJD", "Rate"], table_id=0)
+
+[1m[31mastropy/io/ascii/tests/test_qdp.py[0m:80: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+[1m[31mastropy/io/ascii/qdp.py[0m:420: in _read_table_qdp
+    tables = _get_tables_from_qdp_file(
+[1m[31mastropy/io/ascii/qdp.py[0m:261: in _get_tables_from_qdp_file
+    contents, ncol = _get_type_from_list_of_lines(lines, delimiter=delimiter)
+[1m[31mastropy/io/ascii/qdp.py[0m:124: in _get_type_from_list_of_lines
+    types = [_line_type(line, delimiter=delimiter) for line in lines]
+[1m[31mastropy/io/ascii/qdp.py[0m:124: in <listcomp>
+    types = [_line_type(line, delimiter=delimiter) for line in lines]
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+line = '', delimiter = None
+
+    def _line_type(line, delimiter=None):
+        """Interpret a QDP file line.
+    
+        Parameters
+        ----------
+        line : str
+            a single line of the file
+    
+        Returns
+        -------
+        type : str
+            Line type: "comment", "command", or "data"
+    
+        Examples
+        --------
+        >>> _line_type("READ SERR 3")
+        'command'
+        >>> _line_type(" \\n    !some gibberish")
+        'comment'
+        >>> _line_type("   ")
+        'comment'
+        >>> _line_type(" 21345.45")
+        'data,1'
+        >>> _line_type(" 21345.45 1.53e-3 1e-3 .04 NO nan")
+        'data,6'
+        >>> _line_type(" 21345.45,1.53e-3,1e-3,.04,NO,nan", delimiter=',')
+        'data,6'
+        >>> _line_type(" 21345.45 ! a comment to disturb")
+        'data,1'
+        >>> _line_type("NO NO NO NO NO")
+        'new'
+        >>> _line_type("NO,NO,NO,NO,NO", delimiter=',')
+        'new'
+        >>> _line_type("N O N NOON OON O")
+        Traceback (most recent call last):
+            ...
+        ValueError: Unrecognized QDP line...
+        >>> _line_type(" some non-comment gibberish")
+        Traceback (most recent call last):
+            ...
+        ValueError: Unrecognized QDP line...
+        """
+        _decimal_re = r"[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?"
+        _command_re = r"READ [TS]ERR(\s+[0-9]+)+"
+>       _type_re = rf"^\s*((?P<command>{_command_re})|(?P<new>{_new_re})|(?P<data>{_data_re})?\s*(\!(?P<comment>.*))?\s*$"
+[1m[31mE       UnboundLocalError: local variable '_new_re' referenced before assignment[0m
+
+[1m[31mastropy/io/ascii/qdp.py[0m:64: UnboundLocalError
+[31m[1m______________________________ test_read_example _______________________________[0m
+
+    def test_read_example():
+        example_qdp = """
+            ! Initial comment line 1
+            ! Initial comment line 2
+            READ TERR 1
+            READ SERR 3
+            ! Table 0 comment
+            !a a(pos) a(neg) b c ce d
+            53000.5   0.25  -0.5   1  1.5  3.5 2
+            54000.5   1.25  -1.5   2  2.5  4.5 3
+            NO NO NO NO NO
+            ! Table 1 comment
+            !a a(pos) a(neg) b c ce d
+            54000.5   2.25  -2.5   NO  3.5  5.5 5
+            55000.5   3.25  -3.5   4  4.5  6.5 nan
+            """
+>       dat = ascii.read(example_qdp, format="qdp", table_id=1, names=["a", "b", "c", "d"])
+
+[1m[31mastropy/io/ascii/tests/test_qdp.py[0m:128: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+[1m[31mastropy/io/ascii/ui.py[0m:426: in read
+    dat = reader.read(table)
+[1m[31mastropy/io/ascii/qdp.py[0m:634: in read
+    return _read_table_qdp(
+[1m[31mastropy/io/ascii/qdp.py[0m:420: in _read_table_qdp
+    tables = _get_tables_from_qdp_file(
+[1m[31mastropy/io/ascii/qdp.py[0m:261: in _get_tables_from_qdp_file
+    contents, ncol = _get_type_from_list_of_lines(lines, delimiter=delimiter)
+[1m[31mastropy/io/ascii/qdp.py[0m:124: in _get_type_from_list_of_lines
+    types = [_line_type(line, delimiter=delimiter) for line in lines]
+[1m[31mastropy/io/ascii/qdp.py[0m:124: in <listcomp>
+    types = [_line_type(line, delimiter=delimiter) for line in lines]
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+line = '', delimiter = None
+
+    def _line_type(line, delimiter=None):
+        """Interpret a QDP file line.
+    
+        Parameters
+        ----------
+        line : str
+            a single line of the file
+    
+        Returns
+        -------
+        type : str
+            Line type: "comment", "command", or "data"
+    
+        Examples
+        --------
+        >>> _line_type("READ SERR 3")
+        'command'
+        >>> _line_type(" \\n    !some gibberish")
+        'comment'
+        >>> _line_type("   ")
+        'comment'
+        >>> _line_type(" 21345.45")
+        'data,1'
+        >>> _line_type(" 21345.45 1.53e-3 1e-3 .04 NO nan")
+        'data,6'
+        >>> _line_type(" 21345.45,1.53e-3,1e-3,.04,NO,nan", delimiter=',')
+        'data,6'
+        >>> _line_type(" 21345.45 ! a comment to disturb")
+        'data,1'
+        >>> _line_type("NO NO NO NO NO")
+        'new'
+        >>> _line_type("NO,NO,NO,NO,NO", delimiter=',')
+        'new'
+        >>> _line_type("N O N NOON OON O")
+        Traceback (most recent call last):
+            ...
+        ValueError: Unrecognized QDP line...
+        >>> _line_type(" some non-comment gibberish")
+        Traceback (most recent call last):
+            ...
+        ValueError: Unrecognized QDP line...
+        """
+        _decimal_re = r"[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?"
+        _command_re = r"READ [TS]ERR(\s+[0-9]+)+"
+>       _type_re = rf"^\s*((?P<command>{_command_re})|(?P<new>{_new_re})|(?P<data>{_data_re})?\s*(\!(?P<comment>.*))?\s*$"
+[1m[31mE       UnboundLocalError: local variable '_new_re' referenced before assignment[0m
+
+[1m[31mastropy/io/ascii/qdp.py[0m:64: UnboundLocalError
+[31m[1m____________________________ test_roundtrip_example ____________________________[0m
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/test_roundtrip_example0')
+
+    def test_roundtrip_example(tmp_path):
+        example_qdp = """
+            ! Initial comment line 1
+            ! Initial comment line 2
+            READ TERR 1
+            READ SERR 3
+            ! Table 0 comment
+            !a a(pos) a(neg) b c ce d
+            53000.5   0.25  -0.5   1  1.5  3.5 2
+            54000.5   1.25  -1.5   2  2.5  4.5 3
+            NO NO NO NO NO
+            ! Table 1 comment
+            !a a(pos) a(neg) b c ce d
+            54000.5   2.25  -2.5   NO  3.5  5.5 5
+            55000.5   3.25  -3.5   4  4.5  6.5 nan
+            """
+        test_file = tmp_path / "test.qdp"
+    
+>       t = Table.read(
+            example_qdp, format="ascii.qdp", table_id=1, names=["a", "b", "c", "d"]
+        )
+
+[1m[31mastropy/io/ascii/tests/test_qdp.py[0m:160: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+[1m[31mastropy/table/connect.py[0m:62: in __call__
+    out = self.registry.read(cls, *args, **kwargs)
+[1m[31mastropy/io/registry/core.py[0m:218: in read
+    data = reader(*args, **kwargs)
+[1m[31mastropy/io/ascii/connect.py[0m:19: in io_read
+    return read(filename, **kwargs)
+[1m[31mastropy/io/ascii/ui.py[0m:426: in read
+    dat = reader.read(table)
+[1m[31mastropy/io/ascii/qdp.py[0m:634: in read
+    return _read_table_qdp(
+[1m[31mastropy/io/ascii/qdp.py[0m:420: in _read_table_qdp
+    tables = _get_tables_from_qdp_file(
+[1m[31mastropy/io/ascii/qdp.py[0m:261: in _get_tables_from_qdp_file
+    contents, ncol = _get_type_from_list_of_lines(lines, delimiter=delimiter)
+[1m[31mastropy/io/ascii/qdp.py[0m:124: in _get_type_from_list_of_lines
+    types = [_line_type(line, delimiter=delimiter) for line in lines]
+[1m[31mastropy/io/ascii/qdp.py[0m:124: in <listcomp>
+    types = [_line_type(line, delimiter=delimiter) for line in lines]
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+line = '', delimiter = None
+
+    def _line_type(line, delimiter=None):
+        """Interpret a QDP file line.
+    
+        Parameters
+        ----------
+        line : str
+            a single line of the file
+    
+        Returns
+        -------
+        type : str
+            Line type: "comment", "command", or "data"
+    
+        Examples
+        --------
+        >>> _line_type("READ SERR 3")
+        'command'
+        >>> _line_type(" \\n    !some gibberish")
+        'comment'
+        >>> _line_type("   ")
+        'comment'
+        >>> _line_type(" 21345.45")
+        'data,1'
+        >>> _line_type(" 21345.45 1.53e-3 1e-3 .04 NO nan")
+        'data,6'
+        >>> _line_type(" 21345.45,1.53e-3,1e-3,.04,NO,nan", delimiter=',')
+        'data,6'
+        >>> _line_type(" 21345.45 ! a comment to disturb")
+        'data,1'
+        >>> _line_type("NO NO NO NO NO")
+        'new'
+        >>> _line_type("NO,NO,NO,NO,NO", delimiter=',')
+        'new'
+        >>> _line_type("N O N NOON OON O")
+        Traceback (most recent call last):
+            ...
+        ValueError: Unrecognized QDP line...
+        >>> _line_type(" some non-comment gibberish")
+        Traceback (most recent call last):
+            ...
+        ValueError: Unrecognized QDP line...
+        """
+        _decimal_re = r"[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?"
+        _command_re = r"READ [TS]ERR(\s+[0-9]+)+"
+>       _type_re = rf"^\s*((?P<command>{_command_re})|(?P<new>{_new_re})|(?P<data>{_data_re})?\s*(\!(?P<comment>.*))?\s*$"
+[1m[31mE       UnboundLocalError: local variable '_new_re' referenced before assignment[0m
+
+[1m[31mastropy/io/ascii/qdp.py[0m:64: UnboundLocalError
+[31m[1m_________________________ test_roundtrip_example_comma _________________________[0m
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/test_roundtrip_example_comma0')
+
+    def test_roundtrip_example_comma(tmp_path):
+        example_qdp = """
+            ! Initial comment line 1
+            ! Initial comment line 2
+            READ TERR 1
+            READ SERR 3
+            ! Table 0 comment
+            !a,a(pos),a(neg),b,c,ce,d
+            53000.5,0.25,-0.5,1,1.5,3.5,2
+            54000.5,1.25,-1.5,2,2.5,4.5,3
+            NO,NO,NO,NO,NO
+            ! Table 1 comment
+            !a,a(pos),a(neg),b,c,ce,d
+            54000.5,2.25,-2.5,NO,3.5,5.5,5
+            55000.5,3.25,-3.5,4,4.5,6.5,nan
+            """
+        test_file = tmp_path / "test.qdp"
+    
+>       t = Table.read(
+            example_qdp, format="ascii.qdp", table_id=1, names=["a", "b", "c", "d"], sep=","
+        )
+
+[1m[31mastropy/io/ascii/tests/test_qdp.py[0m:188: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+[1m[31mastropy/table/connect.py[0m:62: in __call__
+    out = self.registry.read(cls, *args, **kwargs)
+[1m[31mastropy/io/registry/core.py[0m:218: in read
+    data = reader(*args, **kwargs)
+[1m[31mastropy/io/ascii/connect.py[0m:19: in io_read
+    return read(filename, **kwargs)
+[1m[31mastropy/io/ascii/ui.py[0m:426: in read
+    dat = reader.read(table)
+[1m[31mastropy/io/ascii/qdp.py[0m:634: in read
+    return _read_table_qdp(
+[1m[31mastropy/io/ascii/qdp.py[0m:420: in _read_table_qdp
+    tables = _get_tables_from_qdp_file(
+[1m[31mastropy/io/ascii/qdp.py[0m:261: in _get_tables_from_qdp_file
+    contents, ncol = _get_type_from_list_of_lines(lines, delimiter=delimiter)
+[1m[31mastropy/io/ascii/qdp.py[0m:124: in _get_type_from_list_of_lines
+    types = [_line_type(line, delimiter=delimiter) for line in lines]
+[1m[31mastropy/io/ascii/qdp.py[0m:124: in <listcomp>
+    types = [_line_type(line, delimiter=delimiter) for line in lines]
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+line = '', delimiter = ','
+
+    def _line_type(line, delimiter=None):
+        """Interpret a QDP file line.
+    
+        Parameters
+        ----------
+        line : str
+            a single line of the file
+    
+        Returns
+        -------
+        type : str
+            Line type: "comment", "command", or "data"
+    
+        Examples
+        --------
+        >>> _line_type("READ SERR 3")
+        'command'
+        >>> _line_type(" \\n    !some gibberish")
+        'comment'
+        >>> _line_type("   ")
+        'comment'
+        >>> _line_type(" 21345.45")
+        'data,1'
+        >>> _line_type(" 21345.45 1.53e-3 1e-3 .04 NO nan")
+        'data,6'
+        >>> _line_type(" 21345.45,1.53e-3,1e-3,.04,NO,nan", delimiter=',')
+        'data,6'
+        >>> _line_type(" 21345.45 ! a comment to disturb")
+        'data,1'
+        >>> _line_type("NO NO NO NO NO")
+        'new'
+        >>> _line_type("NO,NO,NO,NO,NO", delimiter=',')
+        'new'
+        >>> _line_type("N O N NOON OON O")
+        Traceback (most recent call last):
+            ...
+        ValueError: Unrecognized QDP line...
+        >>> _line_type(" some non-comment gibberish")
+        Traceback (most recent call last):
+            ...
+        ValueError: Unrecognized QDP line...
+        """
+        _decimal_re = r"[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?"
+        _command_re = r"READ [TS]ERR(\s+[0-9]+)+"
+>       _type_re = rf"^\s*((?P<command>{_command_re})|(?P<new>{_new_re})|(?P<data>{_data_re})?\s*(\!(?P<comment>.*))?\s*$"
+[1m[31mE       UnboundLocalError: local variable '_new_re' referenced before assignment[0m
+
+[1m[31mastropy/io/ascii/qdp.py[0m:64: UnboundLocalError
+[31m[1m____________________________ test_read_write_simple ____________________________[0m
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/test_read_write_simple0')
+
+    def test_read_write_simple(tmp_path):
+        test_file = tmp_path / "test.qdp"
+        t1 = Table()
+        t1.add_column(Column(name="a", data=[1, 2, 3, 4]))
+        t1.add_column(
+            MaskedColumn(
+                data=[4.0, np.nan, 3.0, 1.0], name="b", mask=[False, False, False, True]
+            )
+        )
+        t1.write(test_file, format="ascii.qdp")
+        with pytest.warns(UserWarning) as record:
+>           t2 = Table.read(test_file, format="ascii.qdp")
+
+[1m[31mastropy/io/ascii/tests/test_qdp.py[0m:210: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+[1m[31mastropy/table/connect.py[0m:62: in __call__
+    out = self.registry.read(cls, *args, **kwargs)
+[1m[31mastropy/io/registry/core.py[0m:218: in read
+    data = reader(*args, **kwargs)
+[1m[31mastropy/io/ascii/connect.py[0m:19: in io_read
+    return read(filename, **kwargs)
+[1m[31mastropy/io/ascii/ui.py[0m:426: in read
+    dat = reader.read(table)
+[1m[31mastropy/io/ascii/qdp.py[0m:634: in read
+    return _read_table_qdp(
+[1m[31mastropy/io/ascii/qdp.py[0m:420: in _read_table_qdp
+    tables = _get_tables_from_qdp_file(
+[1m[31mastropy/io/ascii/qdp.py[0m:261: in _get_tables_from_qdp_file
+    contents, ncol = _get_type_from_list_of_lines(lines, delimiter=delimiter)
+[1m[31mastropy/io/ascii/qdp.py[0m:124: in _get_type_from_list_of_lines
+    types = [_line_type(line, delimiter=delimiter) for line in lines]
+[1m[31mastropy/io/ascii/qdp.py[0m:124: in <listcomp>
+    types = [_line_type(line, delimiter=delimiter) for line in lines]
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+line = '!a b', delimiter = None
+
+    def _line_type(line, delimiter=None):
+        """Interpret a QDP file line.
+    
+        Parameters
+        ----------
+        line : str
+            a single line of the file
+    
+        Returns
+        -------
+        type : str
+            Line type: "comment", "command", or "data"
+    
+        Examples
+        --------
+        >>> _line_type("READ SERR 3")
+        'command'
+        >>> _line_type(" \\n    !some gibberish")
+        'comment'
+        >>> _line_type("   ")
+        'comment'
+        >>> _line_type(" 21345.45")
+        'data,1'
+        >>> _line_type(" 21345.45 1.53e-3 1e-3 .04 NO nan")
+        'data,6'
+        >>> _line_type(" 21345.45,1.53e-3,1e-3,.04,NO,nan", delimiter=',')
+        'data,6'
+        >>> _line_type(" 21345.45 ! a comment to disturb")
+        'data,1'
+        >>> _line_type("NO NO NO NO NO")
+        'new'
+        >>> _line_type("NO,NO,NO,NO,NO", delimiter=',')
+        'new'
+        >>> _line_type("N O N NOON OON O")
+        Traceback (most recent call last):
+            ...
+        ValueError: Unrecognized QDP line...
+        >>> _line_type(" some non-comment gibberish")
+        Traceback (most recent call last):
+            ...
+        ValueError: Unrecognized QDP line...
+        """
+        _decimal_re = r"[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?"
+        _command_re = r"READ [TS]ERR(\s+[0-9]+)+"
+>       _type_re = rf"^\s*((?P<command>{_command_re})|(?P<new>{_new_re})|(?P<data>{_data_re})?\s*(\!(?P<comment>.*))?\s*$"
+[1m[31mE       UnboundLocalError: local variable '_new_re' referenced before assignment[0m
+
+[1m[31mastropy/io/ascii/qdp.py[0m:64: UnboundLocalError
+[31m[1m_____________________ test_read_write_simple_specify_name ______________________[0m
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/test_read_write_simple_specify0')
+
+    def test_read_write_simple_specify_name(tmp_path):
+        test_file = tmp_path / "test.qdp"
+        t1 = Table()
+        t1.add_column(Column(name="a", data=[1, 2, 3]))
+        # Give a non-None err_specs
+        t1.write(test_file, format="ascii.qdp")
+>       t2 = Table.read(test_file, table_id=0, format="ascii.qdp", names=["a"])
+
+[1m[31mastropy/io/ascii/tests/test_qdp.py[0m:232: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+[1m[31mastropy/table/connect.py[0m:62: in __call__
+    out = self.registry.read(cls, *args, **kwargs)
+[1m[31mastropy/io/registry/core.py[0m:218: in read
+    data = reader(*args, **kwargs)
+[1m[31mastropy/io/ascii/connect.py[0m:19: in io_read
+    return read(filename, **kwargs)
+[1m[31mastropy/io/ascii/ui.py[0m:426: in read
+    dat = reader.read(table)
+[1m[31mastropy/io/ascii/qdp.py[0m:634: in read
+    return _read_table_qdp(
+[1m[31mastropy/io/ascii/qdp.py[0m:420: in _read_table_qdp
+    tables = _get_tables_from_qdp_file(
+[1m[31mastropy/io/ascii/qdp.py[0m:261: in _get_tables_from_qdp_file
+    contents, ncol = _get_type_from_list_of_lines(lines, delimiter=delimiter)
+[1m[31mastropy/io/ascii/qdp.py[0m:124: in _get_type_from_list_of_lines
+    types = [_line_type(line, delimiter=delimiter) for line in lines]
+[1m[31mastropy/io/ascii/qdp.py[0m:124: in <listcomp>
+    types = [_line_type(line, delimiter=delimiter) for line in lines]
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+line = '!a', delimiter = None
+
+    def _line_type(line, delimiter=None):
+        """Interpret a QDP file line.
+    
+        Parameters
+        ----------
+        line : str
+            a single line of the file
+    
+        Returns
+        -------
+        type : str
+            Line type: "comment", "command", or "data"
+    
+        Examples
+        --------
+        >>> _line_type("READ SERR 3")
+        'command'
+        >>> _line_type(" \\n    !some gibberish")
+        'comment'
+        >>> _line_type("   ")
+        'comment'
+        >>> _line_type(" 21345.45")
+        'data,1'
+        >>> _line_type(" 21345.45 1.53e-3 1e-3 .04 NO nan")
+        'data,6'
+        >>> _line_type(" 21345.45,1.53e-3,1e-3,.04,NO,nan", delimiter=',')
+        'data,6'
+        >>> _line_type(" 21345.45 ! a comment to disturb")
+        'data,1'
+        >>> _line_type("NO NO NO NO NO")
+        'new'
+        >>> _line_type("NO,NO,NO,NO,NO", delimiter=',')
+        'new'
+        >>> _line_type("N O N NOON OON O")
+        Traceback (most recent call last):
+            ...
+        ValueError: Unrecognized QDP line...
+        >>> _line_type(" some non-comment gibberish")
+        Traceback (most recent call last):
+            ...
+        ValueError: Unrecognized QDP line...
+        """
+        _decimal_re = r"[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?"
+        _command_re = r"READ [TS]ERR(\s+[0-9]+)+"
+>       _type_re = rf"^\s*((?P<command>{_command_re})|(?P<new>{_new_re})|(?P<data>{_data_re})?\s*(\!(?P<comment>.*))?\s*$"
+[1m[31mE       UnboundLocalError: local variable '_new_re' referenced before assignment[0m
+
+[1m[31mastropy/io/ascii/qdp.py[0m:64: UnboundLocalError
+==================================== PASSES ====================================
+[36m[1m=========================== short test summary info ============================[0m
+[32mPASSED[0m astropy/io/ascii/tests/test_qdp.py::[1mtest_get_lines_from_qdp[0m
+[31mFAILED[0m astropy/io/ascii/tests/test_qdp.py::[1mtest_get_tables_from_qdp_file[0m - UnboundLocalError: local variable '_new_re' referenced before assignment
+[31mFAILED[0m astropy/io/ascii/tests/test_qdp.py::[1mtest_roundtrip[0m - UnboundLocalError: local variable '_new_re' referenced before assignment
+[31mFAILED[0m astropy/io/ascii/tests/test_qdp.py::[1mtest_read_example[0m - UnboundLocalError: local variable '_new_re' referenced before assignment
+[31mFAILED[0m astropy/io/ascii/tests/test_qdp.py::[1mtest_roundtrip_example[0m - UnboundLocalError: local variable '_new_re' referenced before assignment
+[31mFAILED[0m astropy/io/ascii/tests/test_qdp.py::[1mtest_roundtrip_example_comma[0m - UnboundLocalError: local variable '_new_re' referenced before assignment
+[31mFAILED[0m astropy/io/ascii/tests/test_qdp.py::[1mtest_read_write_simple[0m - UnboundLocalError: local variable '_new_re' referenced before assignment
+[31mFAILED[0m astropy/io/ascii/tests/test_qdp.py::[1mtest_read_write_simple_specify_name[0m - UnboundLocalError: local variable '_new_re' referenced before assignment
+[31m========================= [31m[1m7 failed[0m, [32m1 passed[0m[31m in 0.22s[0m[31m ==========================[0m

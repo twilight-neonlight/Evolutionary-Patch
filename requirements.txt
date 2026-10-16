@@ -1,0 +1,6 @@
+# 직접 의존성(버전 고정). 전체 잠금은 requirements.lock
+PyYAML==6.0.3
+httpx==0.28.1
+pyarrow==25.0.1
+pytest==9.1.1
+swebench==5.0.2
